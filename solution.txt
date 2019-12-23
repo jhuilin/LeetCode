@@ -10,7 +10,7 @@ def maxProfit(self, prices: List[int]) -> int:
     return res
 ______________________________________________________________________________
 
-27. Remove Element
+27. Remove Element  (Two Pointers)
 def removeElement(self, nums: List[int], val: int) -> int:
     index = 0
     for i in range(len(nums)):
@@ -71,19 +71,160 @@ def findNumbers(self, nums: List[int]) -> int:
     return res
 ______________________________________________________________________________
 
-______________________________________________________________________________
+937. Reorder Data in Log Files
+class Solution:
+    def reorderLogFiles(self, logs: List[str]) -> List[str]:
+        if not logs:
+            return []
+        nums = []
+        letters = []
+        for log in logs:
+            s = log.split()
+            if s[1].isdigit():
+                nums.append(log)
+            else:
+                content = " ".join(s[1:])
+                id = s[0]
+                letters.append([content,id])
+        letters.sort()
+        return [letter[1]+" "+letter[0] for letter in letters] + nums
 
 ______________________________________________________________________________
 
+21. Merge Two Sorted Lists  O(m+n)
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def mergeTwoLists(self, l1: ListNode, l2: ListNode) -> ListNode:
+        if not l1 and not l2:
+            return None
+        if not l1: return l2
+        if not l2: return l1
+        head = ListNode(-1)
+        l3 = head
+        while l1 and l2:
+            if l1.val < l2.val:
+                l3.next = ListNode(l1.val)
+                l1 = l1.next
+            else:
+                l3.next = ListNode(l2.val)
+                l2 = l2.next
+            l3 = l3.next
+        l = l1 if l1 else l2
+        while l:
+            l3.next = ListNode(l.val)
+            l3 = l3.next
+            l = l.next
+        return head.next
 ______________________________________________________________________________
 
+572. Subtree of Another Tree    (DFS) O(m*n)
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def isSubtree(self, s: TreeNode, t: TreeNode) -> bool:
+        if not s and not t: return True
+        if not s or not t: return False
+        return self.dfs(s,t) or self.isSubtree(s.left,t) or self.isSubtree(s.right,t)
+
+    def dfs(self,s,t):
+        if not s and not t: return True
+        if not s or not t: return False
+        if s.val == t.val:
+            return self.dfs(s.left,t.left) and self.dfs(s.right,t.right)
 ______________________________________________________________________________
 
+155. Min Stack
+class MinStack:
+
+    def __init__(self):
+        """
+        initialize your data structure here.
+        """
+        self.min = []
+        self.stack = []
+
+    def push(self, x: int) -> None:
+        self.stack.append(x)
+        if self.min:
+            if x < self.min[-1]:
+                self.min.append(x)
+            else:
+                self.min.append(self.min[-1])
+        else:
+            self.min.append(x)
+
+    def pop(self) -> None:
+        self.stack.pop()
+        self.min.pop()
+
+    def top(self) -> int:
+        if self.stack:
+            return self.stack[-1]
+
+    def getMin(self) -> int:
+        if self.min:
+            return self.min[-1]
 ______________________________________________________________________________
 
+205. Isomorphic Strings
+def isIsomorphic(self, s: str, t: str) -> bool:
+    if not s and not t: return True
+    if len(s) != len(t): return False
+    hashmap = dict()
+    visited = set()
+    for i in range(len(s)):
+        if s[i] in hashmap:
+            if t[i] != hashmap[s[i]]:
+                return False
+        else:
+            if t[i] in visited:
+                return False
+            visited.add(t[i])
+            hashmap[s[i]] = t[i]
+    return True
 ______________________________________________________________________________
 
+819. Most Common Word   (Heapq, Hashmap)
+def mostCommonWord(self, paragraph: str, banned: List[str]) -> str:
+    if not paragraph:
+        return ''
+    words = re.findall(r'\w+', paragraph.lower())
+    h = []
+    hashmap = collections.defaultdict(int)
+    for word in words:
+        if word not in banned:
+            hashmap[word] += 1
+    for key,count in hashmap.items():
+        heapq.heappush(h,[-count,key])
+    return heapq.heappop(h)[1]
 ______________________________________________________________________________
+
+235. Lowest Common Ancestor of a Binary Search Tree   (DFS, BFS)
+def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+    if not root:
+        return
+    if root.val > p.val and root.val > q.val:
+        return self.lowestCommonAncestor(root.left,p,q)
+    if root.val < p.val and root.val < q.val:
+        return self.lowestCommonAncestor(root.right,p,q)
+    return root
+______________________________________________________________________________
+
+100. Same Tree
+def isSameTree(self, p: TreeNode, q: TreeNode) -> bool:
+    if not p and not q: return True
+    if not p or not q: return False
+    if p.val != q.val:
+        return False
+    return self.isSameTree(p.left,q.left) and self.isSameTree(p.right,q.right)
 
 ______________________________________________________________________________
 
