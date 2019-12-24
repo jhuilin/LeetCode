@@ -550,7 +550,7 @@ def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
     return False
 ______________________________________________________________________________
 
-347. Top K Frequent Elements  (Heapq)
+347. Top K Frequent Elements / TopNcompetitor / Buzzwords     (Heapq)
 def topKFrequent(self, nums: List[int], k: int) -> List[int]:
     if not nums:
         return []
@@ -627,15 +627,163 @@ def dfs(self,grid,rows,cols,r,c):
             self.dfs(grid,rows,cols,dr+r,dc+c)
 ______________________________________________________________________________
 
+36. Valid Sudoku        since its bound by 9x9, we are not able to tell the
+                        time complexity, if it is NxN, its NP-complete problem.
+
+def isValidSudoku(self, board: List[List[str]]) -> bool:
+    if not board: return False
+    rows = len(board)
+    cols = len(board[0])
+    for r in range(rows):
+        for c in range(cols):
+            if board[r][c] != '.':
+                if not self.dfs(board,r,c):
+                    return False
+    return True
+
+def dfs(self,board,r,c):
+    value = board[r][c]
+    board[r][c] = '.'
+    for i in range(9):
+        if board[i][c] == value: return False
+        if board[r][i] == value: return False
+    for i in range(3):
+        for j in range(3):
+            if board[r//3*3+i][c//3*3+j] == value: return False
+    board[r][c] = value
+    return True
 ______________________________________________________________________________
 
+3. Longest Substring Without Repeating Characters   (Hashmap)
+def lengthOfLongestSubstring(self, s: str) -> int:
+    if not s:
+        return 0
+    hashmap = dict()
+    res = 0
+    start = 0
+    for i in range(len(s)):
+        if s[i] in hashmap and hashmap[s[i]] >= start:
+            start = hashmap[s[i]] + 1
+        hashmap[s[i]] = i
+        res = max(res,i-start+1)
+    return res
 ______________________________________________________________________________
 
+209. Minimum Size Subarray Sum      (Two Pointers)
+def minSubArrayLen(self, s: int, nums: List[int]) -> int:
+    if not nums: return 0
+    l,r,total=0,0,0
+    ans = float('inf')
+    while r < len(nums):
+        total += nums[r]
+        while total >= s:
+            ans = min(ans,r-l+1)
+            total -= nums[l]
+            l += 1
+        r += 1
+    return ans if ans != float('inf') else 0
 ______________________________________________________________________________
 
+Amazon OA:
+-----------
+Question: Optimal Utilization
+
+Given 2 lists 'a' and 'b'. Each element is a pair of integers where the first
+integer represents the unique id and the second integer represents a value.
+Your task to find an element from 'a' and an element from 'b' such that the sum
+of their values is less or equal to 'target' and such close to target as possible.
+Return a list of ids of selected elements, if not pairs is possible, return []
+
+Input:
+a = [[1, 3], [2, 5], [3, 7], [4, 10]]
+b = [[1, 2], [2, 3], [3, 4], [4, 5]]
+target = 10
+Output: [[2, 4], [3, 2]]
+
+def findPair(a, b, target):   (Two Pointers)
+    if not a or not b:
+        return []
+    ans = []
+    diff = float('inf')
+    a.sort(key=lambda x: x[1])
+    b.sort(key=lambda x: x[1])
+    left, right = 0, len(b) - 1
+    while left < len(a) and right >= 0:
+        aid, avalue = a[left]
+        bid, bvalue = b[right]
+        if target - avalue - bvalue == diff:
+            ans.append([aid, bid])
+        elif avalue + bvalue <= target and target - avalue - bvalue < diff:
+            diff = target - avalue - bvalue
+            ans.clear()
+            ans.append([aid, bid])
+        if avalue + bvalue < target:
+            left += 1
+        else:
+            right -= 1
+    return ans
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Question: Treasure Island / Min Distance to Remove the Obstacle (BFS)
+
+You have a map that marks the location of a treasure island. Some of the map
+area has jagged rocks and dangerous reefs. Other areas are safe to sail in.
+There are other explorers trying to find the treasure. So you must figure out
+a shortest route to the treasure island.
+
+Assume the map area is a two dimensional grid, represented by a matrix of
+characters. You must start from the top-left corner of the map and can move
+one block up, down, left or right at a time. The treasure island is marked
+as X in a block of the matrix. X will not be at the top-left corner. Any block
+with dangerous rocks or reefs will be marked as D. You must not enter dangerous
+blocks. You cannot leave the map area. Other areas O are safe to sail in.
+The top-left corner is always safe. Output the minimum number of steps to get
+to the treasure.
+
+Input:
+[['O', 'O', 'O', 'O'],
+ ['D', 'O', 'D', 'O'],
+ ['O', 'O', 'O', 'O'],
+ ['X', 'D', 'D', 'O']]
+
+Output: 5
+Explanation: Route is (0, 0), (0, 1), (1, 1), (2, 1), (2, 0), (3, 0)
+The minimum route takes 5 steps.
+
+def findPath(matrix):         (BFS) O(MxN)
+  if not matrix: return -1
+  rows = len(matrix)
+  cols = len(matrix[0])
+  q = collections.deque([])
+  q.append([0,0,0])
+  matrix[0][0] = 'D'
+  dirs = [(1,0),(-1,0),(0,1),(0,-1)]
+  while q:
+    n = len(q)
+    for _ in range(n):
+      r,c,step = q.popleft()
+      for dr,dc in dirs:
+        if 0<=dr+r<rows and 0<=dc+c<cols:
+          if matrix[dr+r][dc+c] == 'X': return step + 1
+          if matrix[dr+r][dc+c] == 'O':
+            matrix[dr+r][dc+c] = 'D'
+            q.append([dr+r,dc+c,step+1])
+  return -1
 ______________________________________________________________________________
 
+1167. Minimum Cost to Connect Sticks / Connect Ropes / Merge Files
+def connectSticks(self, sticks: List[int]) -> int:
+    if not sticks: return 0
+    heapq.heapify(sticks)
+    ans = 0
+    while len(sticks) > 1:
+        x,y = heapq.heappop(sticks), heapq.heappop(sticks)
+        s = x + y
+        ans += s
+        heapq.heappush(sticks,s)
+    return ans
 ______________________________________________________________________________
+stop
 
 ______________________________________________________________________________
 
