@@ -405,22 +405,226 @@ def minimumTotal(self, triangle: List[List[int]]) -> int:
     return dp[0]
 ______________________________________________________________________________
 
+146. LRU Cache  (DoubleLinkedList) O(1)
+class Node:
+    def __init__(self,key,value):
+        self.key = key
+        self.value = value
+        self.next = None
+        self.prev = None
+
+class LRUCache:
+
+    def __init__(self, capacity: int):
+        self.head = Node(0,0)
+        self.tail = Node(0,0)
+        self.head.next = self.tail
+        self.tail.prev = self.head
+        self.capacity = capacity
+        self.size = 0
+        self.table = collections.defaultdict(Node)
+
+    def get(self, key: int) -> int:
+        if key not in self.table: return -1
+        node = self.table[key]
+        self.remove(node)
+        self.addHead(node)
+        return node.value
+
+    def put(self, key: int, value: int) -> None:
+        node = Node(key,value)
+        if key in self.table:
+            self.remove(self.table[key])
+            self.addHead(node)
+        else:
+            if self.capacity == self.size:
+                last = self.tail.prev
+                self.remove(last)
+            self.addHead(node)
+
+    def remove(self,node):
+        previous = node.prev
+        next1 = node.next
+        previous.next = next1
+        next1.prev = previous
+        self.size -= 1
+        del self.table[node.key]
+
+    def addHead(self,node):
+        next1 = self.head.next
+        self.head.next = node
+        node.prev = self.head
+        node.next = next1
+        next1.prev = node
+        self.table[node.key] = node
+        self.size += 1
 ______________________________________________________________________________
+
+636. Exclusive Time of Functions  (Stack)
+def exclusiveTime(self, n: int, logs: List[str]) -> List[int]:
+    res = [0]*n
+    stack = []
+    s = logs[0].split(":")
+    id = int(s[0])
+    start = int(s[2])
+    stack.append(id)
+    for log in logs[1:]:
+        s = log.split(":")
+        id = int(s[0])
+        status = s[1]
+        time = int(s[2])
+        if status == 'start':
+            if stack:
+                index = stack[-1]
+                res[index] += time - start
+            start = time
+            stack.append(id)
+        else:
+            index = stack.pop()
+            res[index] += time - start + 1
+            start = time + 1
+    return res
+______________________________________________________________________________
+
+79. Word Search (DFS, Backtracking) O(m*n*4^l) search(4^l), l = len(string)
+def exist(self, board: List[List[str]], word: str) -> bool:
+    if not board: return False
+    rows = len(board)
+    cols = len(board[0])
+    for r in range(rows):
+        for c in range(cols):
+            if board[r][c] == word[0]:
+                board[r][c] = '*'
+                if self.dfs(board,rows,cols,r,c,word[1:]):
+                    return True
+                board[r][c] = word[0]
+    return False
+
+def dfs(self,board,rows,cols,r,c,word):
+    if len(word)==0: return True
+    dirs = [(0,1),(0,-1),(1,0),(-1,0)]
+    for dr,dc in dirs:
+        if 0<=dr+r<rows and 0<=dc+c<cols and board[dr+r][dc+c] == word[0]:
+            board[dr+r][dc+c] = '*'
+            if self.dfs(board,rows,cols,dr+r,dc+c,word[1:]):
+                return True
+            board[dr+r][dc+c] = word[0]
+    return False
+______________________________________________________________________________
+
+277. Find the Celebrity
+# The knows API is already defined for you.
+# return a bool, whether a knows b
+# def knows(a: int, b: int) -> bool:
+
+class Solution:
+    def findCelebrity(self, n: int) -> int:
+        if n < 2:
+            return -1
+        candidate = 0
+        for i in range(1,n):
+            if knows(candidate,i):
+                candidate = i
+        for i in range(n):
+            if i == candidate:
+                continue
+            if knows(candidate,i) or not knows(i,candidate):
+                return -1
+        return candidate
+______________________________________________________________________________
+
+74. Search a 2D Matrix
+240. Search a 2D Matrix II
+def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+    if not matrix: return False
+    rows = len(matrix)-1
+    cols = len(matrix[0])-1
+    r = 0
+    while cols >= 0 and rows >= r:
+        if matrix[r][cols] == target:
+            return True
+        elif matrix[r][cols] > target:
+            cols -= 1
+        else:
+            r += 1
+    return False
+______________________________________________________________________________
+
+347. Top K Frequent Elements  (Heapq)
+def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+    if not nums:
+        return []
+    table = collections.defaultdict(int)
+    for n in nums:
+        table[n] += 1
+
+    h = []
+    for key, value in table.items():
+        heapq.heappush(h,[-value,key])
+    return [heapq.heappop(h)[1] for i in range(k) if h]
+______________________________________________________________________________
+
+698. Partition to K Equal Sum Subsets   (Backtracking)  O(n!)
+def canPartitionKSubsets(self, nums: List[int], k: int) -> bool:
+    total = sum(nums)
+    if k == 0 or total%k != 0: return False
+    visited = [False]*len(nums)
+    total //= k
+    if self.backtracking(nums,visited,0,0,total,k):
+        return True
+    return False
+
+def backtracking(self,nums,visited,index,curSum,target,k):
+    if k <= 1: return True
+    if curSum == target:
+        return self.backtracking(nums,visited,0,0,target,k-1)
+    for i in range(index,len(nums)):
+        if visited[i]: continue
+        visited[i] = True
+        if self.backtracking(nums,visited,i+1,curSum+nums[i],target,k):
+            return True
+        visited[i] = False
+    return Fals
+______________________________________________________________________________
+
+138. Copy List with Random Pointer    （Hashmap）
+def copyRandomList(self, head: 'Node') -> 'Node':
+    if not head: return head
+    hashmap = collections.defaultdict(Node)
+    node = head
+    while node:
+        hashmap[node] = Node(node.val,None,None)
+        node = node.next
+    node = head
+    while node:
+        if node.next:
+            hashmap[node].next = hashmap[node.next]
+        if node.random:
+            hashmap[node].random = hashmap[node.random]
+        node = node.next
+    return hashmap[head]
 
 ______________________________________________________________________________
 
-______________________________________________________________________________
+200. Number of Islands  O(m*n)
+def numIslands(self, grid: List[List[str]]) -> int:
+    if not grid: return 0
+    rows = len(grid)
+    cols = len(grid[0])
+    res = 0
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == '1':
+                self.dfs(grid,rows,cols,r,c)
+                res += 1
+    return res
 
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
+def dfs(self,grid,rows,cols,r,c):
+    grid[r][c] = '0'
+    dirs = [(1,0),(-1,0),(0,1),(0,-1)]
+    for dr,dc in dirs:
+        if 0<=dr+r<rows and 0<=dc+c<cols and grid[dr+r][dc+c] == '1':
+            self.dfs(grid,rows,cols,dr+r,dc+c)
 ______________________________________________________________________________
 
 ______________________________________________________________________________
