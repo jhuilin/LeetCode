@@ -783,10 +783,55 @@ def connectSticks(self, sticks: List[int]) -> int:
         heapq.heappush(sticks,s)
     return ans
 ______________________________________________________________________________
-stop
 
+59. Spiral Matrix II
+def generateMatrix(self, n: int) -> List[List[int]]:
+    if n == 0: return []
+    matrix = [[0 for i in range(n)] for i in range(n)]
+    c,r = 0,0
+    rows = cols = n-1
+    step = 1
+    while r <= rows and c <= cols:
+        for i in range(c,cols+1):
+            matrix[r][i] = step
+            step += 1
+        r += 1
+
+        for i in range(r,rows+1):
+            matrix[i][cols] = step
+            step += 1
+        cols -= 1
+
+        if rows >= r:
+            for i in range(cols,c-1,-1):
+                matrix[rows][i] = step
+                step += 1
+            rows -= 1
+
+        if cols >= c:
+            for i in range(rows,r-1,-1):
+                matrix[i][c] = step
+                step += 1
+            c += 1
+    return matrix
 ______________________________________________________________________________
 
+5. Longest Palindromic Substring    (Manacher's Algorithm)  O(N)
+def longestPalindrome(self, s: str) -> str:
+    start, maxlen = 0, 1
+    for i in range(len(s)):
+        oddstart  = i - maxlen - 1
+        evenstart = i - maxlen
+        odd  = s[oddstart:i+1]
+        even = s[evenstart:i+1]
+
+        if oddstart >= 0 and odd == odd[::-1]:
+            start = oddstart
+            maxlen += 2
+        elif evenstart >= 0 and even == even[::-1]:
+            start = evenstart
+            maxlen += 1
+    return s[start:start+maxlen]
 ______________________________________________________________________________
 
 ______________________________________________________________________________
