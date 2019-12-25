@@ -834,16 +834,125 @@ def longestPalindrome(self, s: str) -> str:
     return s[start:start+maxlen]
 ______________________________________________________________________________
 
+505. The Maze II    (DFS,Heapq) O(M x N x Max(M,N)) for every current node chosen,
+                                              we can travel up to a max depth
+                                              of max(M,N) in any directions
+def shortestDistance(self, maze: List[List[int]], start: List[int], destination: List[int]) -> int:
+    if not maze:
+        return -1
+    dist = [[float('inf') for _ in range(len(maze[0]))] for _ in range(len(maze))]
+    dist[start[0]][start[1]] = 0
+    self.findPath(maze,start[0],start[1],destination,dist)
+    return dist[destination[0]][destination[1]] if dist[destination[0]][destination[1]] != float('inf') else -1
+
+def findPath(self,maze,r,c,destination,dist):
+    h = []
+    heapq.heappush(h,(0,r,c))
+    dirs = [(1,0),(-1,0),(0,1),(0,-1)]
+    while h:
+        dd,rr,cc = heapq.heappop(h)
+        for dr,dc in dirs:
+            nr,nc=rr,cc
+            count = 0
+            while 0<=nr+dr<len(maze) and 0<=nc+dc<len(maze[0]) and maze[nr+dr][nc+dc] == 0:
+                nr += dr
+                nc += dc
+                count += 1
+            nd = count + dd
+            if dist[nr][nc] > nd:
+                dist[nr][nc] = nd
+                if dist[destination[0]][destination[1]] <= nd:
+                    continue
+                heapq.heappush(h,(nd,nr,nc))
 ______________________________________________________________________________
 
+64. Minimum Path Sum      (DP)
+def minPathSum(self, grid: List[List[int]]) -> int:
+    if not grid: return 0
+    rows = len(grid)
+    cols = len(grid[0])
+    for r in range(1,rows):
+        grid[r][0] += grid[r-1][0]
+
+    for c in range(1,cols):
+        grid[0][c] += grid[0][c-1]
+
+    for r in range(1,rows):
+        for c in range(1,cols):
+            grid[r][c] += min(grid[r-1][c],grid[r][c-1])
+    return grid[-1][-1]
 ______________________________________________________________________________
 
+62. Unique Paths        (DP)
+def uniquePaths(self, m: int, n: int) -> int:
+    dp = [[0 for _ in range(m)] for _ in range(n)]
+    for r in range(n):
+        for c in range(m):
+            if r == 0 or c == 0:
+                dp[r][c] = 1
+            else:
+                dp[r][c] = dp[r-1][c] + dp[r][c-1]
+    return dp[n-1][m-1]
 ______________________________________________________________________________
 
+63. Unique Paths II   (DP)
+def uniquePathsWithObstacles(self, matrix: List[List[int]]) -> int:
+    rows = len(matrix)
+    cols = len(matrix[0])
+    dp = [[0 for _ in range(cols)] for _ in range(rows)]
+    for r in range(rows):
+        for c in range(cols):
+            if matrix[r][c] == 1:
+                dp[r][c] = 0
+            elif r == 0 and c == 0:
+                dp[r][c] = 1
+            elif r == 0:
+                dp[r][c] = dp[r][c-1]
+            elif c == 0:
+                dp[r][c] = dp[r-1][c]
+            else:
+                dp[r][c] = dp[r-1][c] + dp[r][c-1]
+    return dp[rows-1][cols-1]
 ______________________________________________________________________________
 
+1102. Path With Maximum Minimum Value   (Heapq)
+def maximumMinimumPath(self, A: List[List[int]]) -> int:
+    if not A: return 0
+    rows = len(A)
+    cols = len(A[0])
+    h = []
+    heapq.heappush(h,(-A[0][0],0,0))
+    A[0][0] = 0
+    dirs = [(1,0),(-1,0),(0,1),(0,-1)]
+    while h:
+        v,r,c = heapq.heappop(h)
+        if r == rows-1 and c == cols-1:
+            return -v
+        for dr,dc in dirs:
+            if 0<=dr+r<rows and 0<=dc+c<cols and A[dr+r][dc+c]:
+                heapq.heappush(h,(max(v,-A[dr+r][dc+c]),dr+r,dc+c))
+                A[dr+r][dc+c] = 0
+    return 0
 ______________________________________________________________________________
 
+701. Insert into a Binary Search Tree   O(LogN)
+def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
+    if not root: return root
+    node = root
+    while node:
+        if node.val > val:
+            if node.left:
+                node = node.left
+            else:
+                node.left = TreeNode(val)
+                break
+        else:
+            if node.right:
+                node = node.right
+            else:
+                node.right = TreeNode(val)
+                break
+    return root
 ______________________________________________________________________________
 
 ______________________________________________________________________________
