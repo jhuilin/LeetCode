@@ -769,6 +769,262 @@ def findPath(matrix):         (BFS) O(MxN)
             matrix[dr+r][dc+c] = 'D'
             q.append([dr+r,dc+c,step+1])
   return -1
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+1135. Connecting cities with minimum cost/Min Cost to Connect All Nodes
+def __init__(self,n):
+    self.parent = [i for i in range(n+1)]
+    self.rank = [i for i in range(n+1)]
+
+def Find(self,u):
+    if u != self.parent[u]:
+        self.parent[u] = self.Find(self.parent[u])
+    return self.parent[u]
+
+def Union(self,u,v):
+    pu,pv = self.Find(u),self.Find(v)
+    if pu != pv:
+        if self.rank[pu] > self.rank[pv]:
+            self.parent[pv] = pu
+        elif self.rank[pu] < self.rank[pv]:
+            self.parent[pu] = pv
+        else:
+            self.parent[pv] = pu
+        return True
+    return False
+
+class Solution:
+def minimumCost(self, N: int, connections: List[List[int]]) -> int:
+    connections.sort(key=lambda x:x[2])
+    uf = UnionFind(N)
+    res = 0
+    for x,y,v in connections:
+        if uf.Union(x,y):
+            res += v
+    group = set()
+    for i in range(1,N+1):
+        group.add(uf.Find(i))
+    return res if len(group) == 1 else -1
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+ Min Cost to Connect All Nodes      (UnionFind)
+ Input: n = 6, edges = [[1, 4], [4, 5], [2, 3]],
+ newEdges = [[1, 2, 5], [1, 3, 10], [1, 6, 2], [5, 6, 5]]
+ Output: 7
+
+ class UnionFind:
+    def __init__(self, n):
+        self.parent = [i for i in range(n + 1)]
+        self.rank = [1 for _ in range(n + 1)]
+
+    def Find(self, u):
+        if u != self.parent[u]:
+            self.parent[u] = self.Find(self.parent[u])
+        return self.parent[u]
+
+    def Union(self, u, v):
+        pu, pv = self.Find(u), self.Find(v)
+        if pu == pv:
+            return False
+        else:
+            if self.rank[pu] > self.rank[pv]:
+                self.parent[pv] = pu
+            elif self.rank[pu] < self.rank[pv]:
+                self.parent[pu] = pv
+            else:
+                self.parent[pv] = pu
+                self.rank[pu] += 1
+        return True
+
+    def isConnected(self, x, y):
+        return self.Find(x) == self.Find(y)
+
+
+class Solution:
+    def MinCosttoConnectAllNodes(self, n, edges, newEdges):
+        uf = UnionFind(n)
+        res = 0
+        for x, y in edges:
+            if not uf.isConnected(x, y):
+                uf.Union(x, y)
+        newEdges.sort(key=lambda x: x[2])
+        for x, y, cost in newEdges:
+            if not uf.isConnected(x, y):
+                uf.Union(x, y)
+                res += cost
+
+        groups = set()
+        for i in range(1, n + 1):
+            groups.add(uf.Find(i))
+        return res if len(groups) == 1 else -1
+
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+ Min Cost to Repair Edges     (UnionFind)
+ class UnionFind:
+     def __init__(self, n):
+         self.parent = [i for i in range(n + 1)]
+         self.rank = [1 for _ in range(n + 1)]
+
+     def Find(self, u):
+         if u != self.parent[u]:
+             self.parent[u] = self.Find(self.parent[u])
+         return self.parent[u]
+
+     def Union(self, u, v):
+         pu, pv = self.Find(u), self.Find(v)
+         if pu == pv:
+             return False
+         else:
+             if self.rank[pu] > self.rank[pv]:
+                 self.parent[pv] = pu
+             elif self.rank[pu] < self.rank[pv]:
+                 self.parent[pu] = pv
+             else:
+                 self.parent[pv] = pu
+                 self.rank[pu] += 1
+         return True
+
+     def isConnected(self, x, y):
+         return self.Find(x) == self.Find(y)
+
+
+ class Solution:
+     def __init__(self):
+         print('xnyz')
+
+     def MinCosttoConnectAllNodes(self, n, edges, newEdges):
+         uf = UnionFind(n)
+         res = 0
+         repair = collections.defaultdict(int)
+         newEdges.sort(key=lambda x: x[2])
+
+         for x, y, cost in newEdges:
+             repair[(x, y)] = cost
+
+         for x, y in edges:
+             if (x, y) not in repair and not uf.isConnected(x, y):
+                 uf.Union(x, y)
+
+         for x, y in repair:
+             if not uf.isConnected(x, y):
+                 uf.Union(x, y)
+                 res += repair[(x, y)]
+
+         groups = set()
+         for i in range(1, n + 1):
+             groups.add(uf.Find(i))
+         return res if len(groups) == 1 else -1
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+1102. Path With Maximum Minimum Value   (Heapq)
+                                        O(log(V) * (V + E))
+                                        (V + E) the time complexity of finding
+                                        one path
+                                        log(V) is the time complexity of
+                                        maintaining the heap.
+def maximumMinimumPath(self, matrix: List[List[int]]) -> int:
+    if not matrix: return 0
+    rows = len(matrix)
+    cols = len(matrix[0])
+    h = []
+    heapq.heappush(h,(-matrix[0][0],0,0))
+    matrix[0][0] = 0
+    dirs = [(1,0),(-1,0),(0,-1),(0,1)]
+    score = float('inf')
+    while h:
+        v,r,c = heapq.heappop(h)
+        score = min(-v,score)
+        if r == rows-1 and c == cols-1:
+            return score
+        for dr,dc in dirs:
+            if 0<=dr+r<rows and 0<=dc+c<cols and matrix[dr+r][dc+c]:
+                heapq.heappush(h,(-matrix[dr+r][dc+c],dr+r,dc+c))
+                matrix[dr+r][dc+c] = 0
+    return 0
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Max Of Min Altitudes          O(m+n)
+Given a matrix with r rows and c columns, find the maximum score of a path
+starting at [0, 0] and ending at [r-1, c-1]. The score of a path is the minimum
+value in that path. For example, the score of the path 8 → 4 → 5 → 9 is 4.
+
+Don't include the first or final entry. You can only move either down or right
+at any point in time.
+
+def maximumMinimumAltitudes(matrix):
+  if not matrix: return 0
+  rows = len(matrix)
+  cols = len(matrix[0])
+  h = []
+  heapq.heappush(h,(float('-inf'),0,0))
+  matrix[-1][-1] = float('inf')
+  score = float('inf')
+  dirs = [(0,1),(1,0)]
+  while h:
+    v,r,c = heapq.heappop(h)
+    score = min(-v,score)
+    if r == rows-1 and c == cols-1:
+      return score
+    for dr,dc in dirs:
+      if dr+r<rows and dc+c<cols:
+        heapq.heappush(h,(-matrix[dr+r][dc+c],dr+r,dc+c))
+  return 0
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  1120. Maximum Average Subtree   (bottom-up)
+  # class TreeNode:
+  #     def __init__(self, x):
+  #         self.val = x
+  #         self.left = None
+  #         self.right = None
+
+  class Solution:
+      def maximumAverageSubtree(self, root: TreeNode) -> float:
+          self.res = 0
+          self.dfs(root)
+          return self.res
+
+      def dfs(self,root):
+          if not root:
+              return [0,0.0]
+          s1,t1 = self.dfs(root.left)
+          s2,t2 = self.dfs(root.right)
+          s = s1 + s2 + 1
+          t = t1 + t2 + root.val
+          self.res = max(self.res,t/s)
+          return [s,t]
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    Maximum Average of n-ary Subtree
+
+    class TreeNode:
+      def __init__(self,x):
+        self.val = x
+        self.children = []
+
+    class Solution:
+      def maximumAverageSubtree(self,root):
+        self.res = 0
+        self.dfs(root)
+        return self.res
+
+      def dfs(self,root):
+        if not root.children:
+          return [1,root.val]
+        total = root.val
+        nodes = 1
+        for child in root.children:
+          n,t = self.dfs(child)
+          total += t
+          nodes += n
+        self.res = max(self.res,total/nodes)
+        return [nodes,total]
 ______________________________________________________________________________
 
 1167. Minimum Cost to Connect Sticks / Connect Ropes / Merge Files
@@ -915,24 +1171,17 @@ def uniquePathsWithObstacles(self, matrix: List[List[int]]) -> int:
     return dp[rows-1][cols-1]
 ______________________________________________________________________________
 
-1102. Path With Maximum Minimum Value   (Heapq)
-def maximumMinimumPath(self, A: List[List[int]]) -> int:
-    if not A: return 0
-    rows = len(A)
-    cols = len(A[0])
-    h = []
-    heapq.heappush(h,(-A[0][0],0,0))
-    A[0][0] = 0
-    dirs = [(1,0),(-1,0),(0,1),(0,-1)]
-    while h:
-        v,r,c = heapq.heappop(h)
-        if r == rows-1 and c == cols-1:
-            return -v
-        for dr,dc in dirs:
-            if 0<=dr+r<rows and 0<=dc+c<cols and A[dr+r][dc+c]:
-                heapq.heappush(h,(max(v,-A[dr+r][dc+c]),dr+r,dc+c))
-                A[dr+r][dc+c] = 0
-    return 0
+56. Merge Intervals
+def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+    if not intervals: return []
+    res = []
+    intervals.sort(key=lambda x:x[0])
+    for interval in intervals:
+        if not res or res[-1][1] < interval[0]:
+            res.append(interval)
+        else:
+            res[-1][1] = max(res[-1][1],interval[1])
+    return res
 ______________________________________________________________________________
 
 701. Insert into a Binary Search Tree   O(LogN)
@@ -955,7 +1204,184 @@ def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
     return root
 ______________________________________________________________________________
 
+957. Prison Cells After N Days    (DP)
+def prisonAfterNDays(self, cells: List[int], N: int) -> List[int]:
+    if not cells: return cells
+    n = N%14 if N%14 != 0 else 14
+    for i in range(n):
+        dp = cells.copy()
+        for i in range(len(dp)):
+            if i == 0 or i == len(dp) - 1:
+                dp[i] = 0
+            else:
+                dp[i] = 1 if cells[i-1] == cells[i+1] else 0
+        cells = dp.copy()
+    return cells
 ______________________________________________________________________________
+
+763. Partition Labels   (Greedy)
+def partitionLabels(self, s: str) -> List[int]:
+    if not s: return []
+    table = collections.defaultdict(int)
+    for i in range(len(s)):
+        table[s[i]] = i
+
+    start = end = 0
+    res = []
+    for i in range(len(s)):
+        end = max(end,table[s[i]])
+        if end == i:
+            res.append(end-start+1)
+            start = end + 1
+    return res
+______________________________________________________________________________
+
+253. Meeting Rooms II   (Heapq)
+def minMeetingRooms(self, intervals: List[List[int]]) -> int:
+    if not intervals:
+        return 0
+    intervals.sort(key=lambda x:x[0])
+    rooms = []
+    for interval in intervals:
+        if rooms and interval[0] >= rooms[0]:
+            heapq.heapreplace(rooms,interval[1])
+        else:
+            heapq.heappush(rooms,interval[1])
+    return len(rooms)
+______________________________________________________________________________
+
+767. Reorganize String    (heapq, hashmap)    O(NlogA)
+                                                N: length of s
+                                                A: size of alphabet
+def reorganizeString(self, S: str) -> str:
+    if not S: return ''
+    count = collections.defaultdict(int)
+    for s in S:
+        count[s] += 1
+    if max(count.values()) > (len(S)+1)//2:
+        return ''
+    h = []
+    res = ""
+    for key,value in count.items():
+        heapq.heappush(h,[-value,key])
+
+    while len(h) > 1:
+        v1,k1 = heapq.heappop(h)
+        v2,k2 = heapq.heappop(h)
+        res += k1 + k2
+        v1 += 1
+        v2 += 1
+        if v1 < 0:
+            heapq.heappush(h,[v1,k1])
+        if v2 < 0:
+            heapq.heappush(h,[v2,k2])
+    if h:
+        res += heapq.heappop(h)[1]
+    return res
+______________________________________________________________________________
+
+1054. Distant Barcodes    (heapq, hashmap)    O(NlogA)
+                                              N: length of s
+                                              A: size of digits
+def rearrangeBarcodes(self, barcodes: List[int]) -> List[int]:
+    count = collections.defaultdict(int)
+    for i in barcodes:
+        count[i] += 1
+    h = []
+    for key, value in count.items():
+        heapq.heappush(h,[-value,key])
+    res = []
+    while len(h) > 1:
+        v1,k1 = heapq.heappop(h)
+        v2,k2 = heapq.heappop(h)
+        res.append(k1)
+        res.append(k2)
+        v1 += 1
+        v2 += 1
+        if v1 < 0:
+            heapq.heappush(h,[v1,k1])
+        if v2 < 0:
+            heapq.heappush(h,[v2,k2])
+    if h:
+        res.append(heapq.heappop(h)[1])
+    return res
+______________________________________________________________________________
+
+545. Boundary of Binary Tree    (O(N)), preOrder for leftBoundary
+                                        inOrder for leaves
+                                        postOrder for rightBoundary
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def boundaryOfBinaryTree(self, root: TreeNode) -> List[int]:
+        if not root: return []
+        self.res = [root.val]
+        self.leftBoundary(root.left)
+        self.leaves(root,root)
+        self.rightBoundary(root.right)
+        return self.res
+
+    def leftBoundary(self,root):
+        if not root or root.left == root.right:
+            return
+        self.res.append(root.val)
+        if root.left:
+            self.leftBoundary(root.left)
+        else:
+            self.leftBoundary(root.right)
+
+    def leaves(self,node,root):
+        if not node:
+            return
+        self.leaves(node.left,root)
+        if node != root and node.left == node.right:
+            self.res.append(node.val)
+        self.leaves(node.right,root)
+
+    def rightBoundary(self,root):
+        if not root or root.left == root.right:
+            return
+        if root.right:
+            self.rightBoundary(root.right)
+        else:
+            self.rightBoundary(root.left)
+        self.res.append(root.val)
+
+______________________________________________________________________________
+
+221. Maximal Square   (DP)
+def maximalSquare(self, matrix: List[List[str]]) -> int:
+    if not matrix:
+        return 0
+    rows = len(matrix)
+    cols = len(matrix[0])
+    dp = [[0 for _ in range(cols)] for _ in range(rows)]
+
+    for r in range(rows):
+        for c in range(cols):
+            if matrix[r][c] == '1':
+                if r == 0 or c == 0:
+                    dp[r][c] = 1
+                else:
+                    dp[r][c] = min(dp[r-1][c-1],dp[r-1][c],dp[r][c-1]) + 1
+    return max(map(max,dp))**2
+______________________________________________________________________________
+
+49. Group Anagrams        O(NK) N: length of String, K: max size of substring
+
+def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+    if not strs: return []
+    table = collections.defaultdict(list)
+    for s in strs:
+        count = [0]*26
+        for c in s:
+            count[ord(c) - ord('a')] += 1
+        table[tuple(count)].append(s)
+    return table.values()
 
 ______________________________________________________________________________
 
@@ -966,19 +1392,7 @@ ______________________________________________________________________________
 ______________________________________________________________________________
 
 ______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
+stop
 ______________________________________________________________________________
 
 ______________________________________________________________________________
