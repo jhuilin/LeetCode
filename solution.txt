@@ -921,11 +921,7 @@ class Solution:
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 1102. Path With Maximum Minimum Value   (Heapq)
-                                        O(log(V) * (V + E))
-                                        (V + E) the time complexity of finding
-                                        one path
-                                        log(V) is the time complexity of
-                                        maintaining the heap.
+                                        O(MN logMN)
 def maximumMinimumPath(self, matrix: List[List[int]]) -> int:
     if not matrix: return 0
     rows = len(matrix)
@@ -948,7 +944,7 @@ def maximumMinimumPath(self, matrix: List[List[int]]) -> int:
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-Max Of Min Altitudes          O(m+n)
+Max Of Min Altitudes          O(MN logMN)
 Given a matrix with r rows and c columns, find the maximum score of a path
 starting at [0, 0] and ending at [r-1, c-1]. The score of a path is the minimum
 value in that path. For example, the score of the path 8 → 4 → 5 → 9 is 4.
@@ -1025,6 +1021,100 @@ def maximumMinimumAltitudes(matrix):
           nodes += n
         self.res = max(self.res,total/nodes)
         return [nodes,total]
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Longest string made up of only vowels
+You are given with a string . Your task is to remove at most two substrings of
+any length from the given string such that the remaining string contains
+vowels('a','e','i','o','u') only. Your aim is the maximize the length of the
+remaining string. Output the length of remaining string after removal of at most
+two substrings.
+NOTE: The answer may be 0, i.e. removing the entire string.
+
+Sample Input:
+  earthpoblem
+  letsgosomewhere
+
+Sample Output:
+3
+2
+
+def longestVowelsOnlySubstring(s):
+    if not s:
+        return
+    count, aux, vowls = 0, [], tuple('aeiou')
+    for c in s + 'z':
+        if c in vowls:
+            count += 1
+        elif count:
+            aux.append(count)
+            count = 0
+    if s[0] not in vowls:
+        aux = [0] + aux
+    if s[-1] not in vowls:
+        aux = aux + [0]
+    return (aux[0] + aux[-1] + max(aux[1:-1])) if len(aux) >= 3 else sum(aux)
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  Assume numbers from 1-26 map to all lowercase letters.
+  (Eg. 1->a, 2->b, 3->c .... 11->k, 12->l, 13->m).
+  Given an sequence of numbers, return the all possible words you can make from
+  that sequence.
+
+  Example: Input: 123
+  output: ["abc", "lc", "aw"]
+  abc : 1->a, 2->b, 3->c lc : 12->l & 3->c aw: 1->a & 23->w
+
+  You can assume you have a helper function numberToLetter(int number)
+  that returns the corresponding letter
+
+  def getComb(self, digits):
+      self.table = {
+          1: 'a',
+          2: 'b',
+          3: 'c',
+          4: 'd',
+          5: 'e',
+          6: 'f',
+          7: 'g',
+          8: 'h',
+          9: 'i',
+          10: 'j',
+          11: 'k',
+          12: 'l',
+          13: 'm',
+          14: 'n',
+          15: 'o',
+          16: 'p',
+          17: 'q',
+          18: 'r',
+          19: 's',
+          20: 't',
+          21: 'u',
+          22: 'v',
+          23: 'w',
+          24: 'x',
+          25: 'y',
+          26: 'z',
+      }
+      self.res = []
+      self.dfs(digits, 0, '')
+      return self.res
+
+  def dfs(self, digits, start, subset):
+      if start >= len(digits):
+          self.res.append(subset)
+          return
+      if int(digits[start]) in self.table:
+          self.dfs(digits, start + 1, subset + self.table[int(digits[start])])
+      if start < len(digits) - 1 and int(digits[start:start+2]) in self.table:
+          self.dfs(digits, start+2, subset + self.table[int(digits[start: start + 2])])
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Amazon End:
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ______________________________________________________________________________
 
 1167. Minimum Cost to Connect Sticks / Connect Ropes / Merge Files
@@ -1219,7 +1309,7 @@ def prisonAfterNDays(self, cells: List[int], N: int) -> List[int]:
     return cells
 ______________________________________________________________________________
 
-763. Partition Labels   (Greedy)
+763. Partition Labels         (Greedy)
 def partitionLabels(self, s: str) -> List[int]:
     if not s: return []
     table = collections.defaultdict(int)
@@ -1382,8 +1472,276 @@ def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
             count[ord(c) - ord('a')] += 1
         table[tuple(count)].append(s)
     return table.values()
-
 ______________________________________________________________________________
+
+139. Word Break           (DP)
+def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+    dp = [True]+[False]*len(s)
+    for i in range(len(dp)):
+        for word in wordDict:
+            if dp[i]:
+                length = len(word)
+                if i + length < len(dp) and s[i:i+length] == word:
+                    dp[i+length] = True
+    return dp[-1]
+______________________________________________________________________________
+
+199. Binary Tree Right Side View    (BFS)
+def rightSideView(self, root: TreeNode) -> List[int]:
+    if not root: return []
+    q = collections.deque([])
+    q.append(root)
+    res = []
+    while q:
+        n = len(q)
+        for i in range(n):
+            node = q.popleft()
+            if i == n-1:
+                res.append(node.val)
+            if node.left:
+                q.append(node.left)
+            if node.right:
+                q.append(node.right)
+    return res
+______________________________________________________________________________
+
+1161. Maximum Level Sum of a Binary Tree    (BFS)
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def maxLevelSum(self, root: TreeNode) -> int:
+        if not root: return 0
+        q = collections.deque([])
+        q.append(root)
+        level = 1
+        res = float('-inf')
+        ans = 1
+        while q:
+            n = len(q)
+            temp = 0
+            for i in range(n):
+                node = q.popleft()
+                temp += node.val
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+            if temp > res:
+                res = temp
+                ans = level
+            level += 1
+        return ans
+______________________________________________________________________________
+
+8. String to Integer (atoi)
+def myAtoi(self, str: str) -> int:
+    s = str.strip()
+    if not s: return 0
+    table = {
+        "1": 1,
+        "2": 2,
+        "3": 3,
+        "4": 4,
+        "5": 5,
+        "6": 6,
+        "7": 7,
+        "8": 8,
+        "9": 9,
+        "0": 0,
+    }
+    res = 0
+    mx = 2**31-1
+    mi = -2**31
+    if s[0] == '-':
+        positive = False
+        s = s[1:]
+    elif s[0] == '+':
+        s = s[1:]
+        positive = True
+    elif s[0].isdigit():
+        positive = True
+    else:
+        return 0
+    for digit in s:
+        if digit in table:
+            res = res*10 + table[digit]
+        else:
+            break
+    return min(mx,res) if positive else max(-res,mi)
+______________________________________________________________________________
+
+17. Letter Combinations of a Phone Number   (DFS)
+def letterCombinations(self, digits: str) -> List[str]:
+    if not digits:
+        return []
+    self.table = {
+        '2': 'abc',
+        '3': 'def',
+        '4': 'ghi',
+        '5': 'jkl',
+        '6': 'mno',
+        '7': 'pqrs',
+        '8': 'tuv',
+        '9': 'wxyz'
+    }
+    self.res = []
+    self.dfs(digits,0,'')
+    return self.res
+
+def dfs(self,digits,index,letters):
+    if len(letters) == len(digits):
+        self.res.append(letters)
+        return
+    value = self.table[digits[index]]
+    for letter in value:
+        self.dfs(digits,index+1,letters+letter)
+______________________________________________________________________________
+
+528. Random Pick with Weight
+class Solution:
+
+    def __init__(self, w: List[int]):
+        self.w = w
+        self.n = len(w)
+        for i in range(1,self.n):
+            self.w[i] += self.w[i-1]
+        self.max = self.w[-1]
+
+    def pickIndex(self) -> int:
+        seed = random.randint(1,self.max)
+        l,r = 0, self.n-1
+        while l<r:
+            mid = l + (r-l)//2
+            if self.w[mid] < seed:
+                l = mid + 1
+            else:
+                r = mid
+        return l
+______________________________________________________________________________
+
+46. Permutations      O(N*N!)  space(N!)
+def permute(self, nums: List[int]) -> List[List[int]]:
+    if not nums: return []
+    self.res = []
+    visited = [False]*(len(nums)+1)
+    self.dfs(nums,visited,[])
+    return self.res
+
+def dfs(self,nums,visited,subset):
+    if len(subset) == len(nums):
+        self.res.append(subset)
+        return
+    for i in range(len(nums)):
+        if not visited[i]:
+            visited[i] = True
+            subset.append(nums[i])
+            self.dfs(nums,visited,subset.copy())
+            visited[i] = False
+            subset.remove(nums[i])
+______________________________________________________________________________
+
+1155. Number of Dice Rolls With Target Sum    O(target*dices*faces)
+def numRollsToTarget(self, d: int, f: int, target: int) -> int:
+    dp = [[0 for _ in range(target+1)] for _ in range(d+1)]
+    dp[0][0] = 1
+    for i in range(1,d+1):
+        for j in range(1,f+1):
+            for k in range(j,target+1):
+                dp[i][k] = (dp[i][k] + dp[i-1][k-j])%(10**9+7)
+    return dp[d][target]
+______________________________________________________________________________
+
+31. Next Permutation
+def nextPermutation(self, nums: List[int]) -> None:
+    """
+    Do not return anything, modify nums in-place instead.
+    """
+    if not nums or len(nums) < 2: return
+    i = len(nums)-1
+    while i>0 and nums[i-1] >= nums[i]:
+        i -= 1
+    if i == 0:
+        nums.sort()
+    else:
+        j = len(nums)-1
+        while nums[j] <= nums[i-1]:
+            j -= 1
+        nums[j],nums[i-1] = nums[i-1],nums[j]
+        n = len(nums)-1
+        while i < n:
+            nums[i],nums[n] = nums[n],nums[i]
+            i += 1
+            n -= 1
+______________________________________________________________________________
+
+91. Decode Ways       (DP)
+def numDecodings(self, s: str) -> int:
+    dp = [1]+[0]*len(s)
+    for i in range(1,len(dp)):
+        if s[i-1] != '0':
+            dp[i] = dp[i-1]
+        if i > 1 and 10 <= int(s[i-2:i]) <= 26:
+            dp[i] += dp[i-2]
+    return dp[-1]
+______________________________________________________________________________
+
+78. Subsets                       O(N*2^N)
+                                  N = length of nums, and 2^n subsets
+def subsets(self, nums: List[int]) -> List[List[int]]:
+    if not nums: return []
+    self.res = []
+    self.dfs(nums,0,[])
+    return self.res
+
+def dfs(self,nums,index,subset):
+    if not nums:
+        return
+    self.res.append(subset)
+    for i in range(index,len(nums)):
+        self.dfs(nums,i+1,subset+[nums[i]])
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+def subsets(self, nums: List[int]) -> List[List[int]]:
+    subsets = [[]]
+    for num in nums:
+        subsets += [[num] + lst for lst in subsets]
+    return subsets
+______________________________________________________________________________
+
+116. Populating Next Right Pointers in Each Node
+117. Populating Next Right Pointers in Each Node II
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val: int = 0, left: 'Node' = None, right: 'Node' = None, next: 'Node' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+        self.next = next
+"""
+class Solution:
+    def connect(self, root: 'Node') -> 'Node':
+        if not root: return root
+        q = collections.deque([])
+        q.append(root)
+        while q:
+            n = len(q)
+            for i in range(n):
+                node = q.popleft()
+                if i < n-1:
+                    node.next = q[0]
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+        return root
+______________________________________________________________________________
+
+
 
 ______________________________________________________________________________
 
@@ -1393,30 +1751,6 @@ ______________________________________________________________________________
 
 ______________________________________________________________________________
 stop
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
 ______________________________________________________________________________
 
 ______________________________________________________________________________
