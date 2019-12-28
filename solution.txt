@@ -1340,36 +1340,6 @@ def minMeetingRooms(self, intervals: List[List[int]]) -> int:
     return len(rooms)
 ______________________________________________________________________________
 
-767. Reorganize String    (heapq, hashmap)    O(NlogA)
-                                                N: length of s
-                                                A: size of alphabet
-def reorganizeString(self, S: str) -> str:
-    if not S: return ''
-    count = collections.defaultdict(int)
-    for s in S:
-        count[s] += 1
-    if max(count.values()) > (len(S)+1)//2:
-        return ''
-    h = []
-    res = ""
-    for key,value in count.items():
-        heapq.heappush(h,[-value,key])
-
-    while len(h) > 1:
-        v1,k1 = heapq.heappop(h)
-        v2,k2 = heapq.heappop(h)
-        res += k1 + k2
-        v1 += 1
-        v2 += 1
-        if v1 < 0:
-            heapq.heappush(h,[v1,k1])
-        if v2 < 0:
-            heapq.heappush(h,[v2,k2])
-    if h:
-        res += heapq.heappop(h)[1]
-    return res
-______________________________________________________________________________
-
 1054. Distant Barcodes    (heapq, hashmap)    O(NlogA)
                                               N: length of s
                                               A: size of digits
@@ -1741,9 +1711,256 @@ class Solution:
         return root
 ______________________________________________________________________________
 
-
-
+12. Integer to Roman
+def intToRoman(self, num: int) -> str:
+    symbols = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I']
+    values = [1000, 900, 500, 400,100,90,50,40,10,9,5,4,1]
+    res = ''
+    for i in range(len(values)):
+        while num >= values[i]:
+            num -= values[i]
+            res += symbols[i]
+    return res
 ______________________________________________________________________________
+
+24. Swap Nodes in Pairs
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def swapPairs(self, head: ListNode) -> ListNode:
+        if not head or not head.next: return head
+        dummy = ListNode(-1)
+        dummy.next = head
+        temp = dummy
+        while head and head.next:
+            p1 = head
+            p2 = head.next
+            
+            p1.next = p2.next
+            p2.next = p1
+            temp.next = p2
+            
+            temp = p1
+            head = p1.next
+        return dummy.next
+______________________________________________________________________________
+
+29. Divide Two Integers             (bit)
+def divide(self, dividend: int, divisor: int) -> int:
+    positive = (dividend > 0) is (divisor > 0)
+    dividend,divisor = abs(dividend),abs(divisor)
+    mi,mx = -2147483648, 2147483647
+    res = 0
+    while dividend >= divisor:
+        temp, times = divisor, 1
+        while dividend >= temp:
+            res += times
+            dividend -= temp
+            temp <<= 1
+            times <<= 1
+    return min(res,mx) if positive else max(-res,mi)
+______________________________________________________________________________
+
+1060. Missing Element in Sorted Array       (Binary Search)
+def missingElement(self, nums: List[int], k: int) -> int:
+    missing = lambda index:nums[index]-nums[0]-index
+    n = len(nums)
+    if k > missing(n-1):
+        return nums[n-1] + k - missing(n-1)
+    l,r = 0, n-1
+    while l < r:
+        mid = l + (r-l)//2
+        if missing(mid) < k:
+            l = mid + 1
+        else:
+            r = mid
+    return nums[l-1] + k - missing(l-1)
+______________________________________________________________________________
+
+236. Lowest Common Ancestor of a Binary Tree    (DFS)
+def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+    if not root or root == p or root == q:
+        return root
+    left = self.lowestCommonAncestor(root.left,p,q)
+    right = self.lowestCommonAncestor(root.right,p,q)
+    if left and right:
+        return root
+    return left if left else right
+______________________________________________________________________________
+
+37. Sudoku Solver       (backtracking)  O((9!)^9)
+def solveSudoku(self, board: List[List[str]]) -> None:
+    """
+    Do not return anything, modify board in-place instead.
+    """
+    self.dfs(board)  
+
+def validate(self,board,r,c):
+    value = board[r][c]
+    board[r][c] = '.'
+    for i in range(9):
+        if board[r][i] == value: return False
+        if board[i][c] == value: return False
+    for i in range(3):
+        for j in range(3):
+            if board[r//3*3+i][c//3*3+j] == value:
+                return False
+    board[r][c] = value
+    return True
+
+def dfs(self,board):
+    for r in range(9):
+        for c in range(9):
+            if board[r][c] == '.':
+                for digit in '123456789':
+                    board[r][c] = digit
+                    if self.validate(board,r,c) and self.dfs(board):
+                        return True
+                    board[r][c] = '.'
+                return False
+    return True
+______________________________________________________________________________
+
+23. Merge k Sorted Lists   O(NlogK) k is len(lists), N is length of one list in lists
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def mergeKLists(self, lists: List[ListNode]) -> ListNode:
+        if not lists:
+            return None
+        while len(lists) > 1:
+            temp = []
+            for index in range(0,len(lists)-1,2):
+                temp.append(self.merge(lists[index],lists[index+1]))
+            if len(lists)%2 == 1:
+                temp.append(lists[-1])
+            lists = temp
+        return lists[0]
+        
+    def merge(self,list1,list2):
+        dummy = ListNode(0)
+        l = dummy
+        while list1 and list2:
+            if list1.val < list2.val:
+                l.next = list1
+                list1 = list1.next
+            else:
+                l.next = list2
+                list2 = list2.next
+            l = l.next
+            
+        if not list1:
+            l.next = list2
+        if not list2:
+            l.next = list1
+            
+        return dummy.next
+______________________________________________________________________________
+
+340. Longest Substring with At Most K Distinct Characters   (hashmap)
+def lengthOfLongestSubstringKDistinct(self, s: str, k: int) -> int:
+    if not s: return 0
+    hashmap = collections.defaultdict(int)
+    res = 0
+    l,r = 0,0
+    while r < len(s):
+        hashmap[s[r]] += 1
+        while len(hashmap) > k:
+            hashmap[s[l]] -= 1
+            if hashmap[s[l]] == 0:
+                del hashmap[s[l]]
+            l += 1
+        res = max(res,r-l+1)
+        r += 1
+    return res
+______________________________________________________________________________
+
+992. Subarrays with K Different Integers
+def subarraysWithKDistinct(self, A: List[int], K: int) -> int:
+    return self.atMostK(A,K) - self.atMostK(A,K-1)
+
+def atMostK(self,A,k):
+    if not A: return 0
+    l,r=0,0
+    ans = 0
+    hashmap = collections.defaultdict(int)
+    while r < len(A):
+        hashmap[A[r]] += 1
+        while len(hashmap) > k:
+            hashmap[A[l]] -= 1
+            if hashmap[A[l]] == 0:
+                del hashmap[A[l]]
+            l += 1
+        ans += r-l+1
+        r += 1
+    return ans
+______________________________________________________________________________
+
+358. Rearrange String k Distance Apart          O(NlogA)
+                                                N: length of s
+                                                A: size of alphabet
+def rearrangeString(self, s: str, k: int) -> str:
+    if k == 0 or len(s) < k:
+        return s
+    count = collections.defaultdict(int)
+    for n in s:
+        count[n] += 1
+    h = []
+    for key,value in count.items():
+        heapq.heappush(h,[-value,key])
+    res = ''
+    while h:
+        temp = []
+        for i in range(k):
+            t = heapq.heappop(h)
+            res += t[1]
+            temp.append(t)
+            if not h:
+                if i != k-1 and len(res) != len(s):
+                    return ''
+                break
+        for x in temp:
+            x[0] += 1
+            if x[0] < 0:
+                heapq.heappush(h,x)
+    return res
+______________________________________________________________________________
+
+767. Reorganize String    (heapq, hashmap)    O(NlogA)
+                                                N: length of s
+                                                A: size of alphabet
+def reorganizeString(self, S: str) -> str:
+    if not S: return ''
+    count = collections.defaultdict(int)
+    for s in S:
+        count[s] += 1
+    if max(count.values()) > (len(S)+1)//2:
+        return ''
+    h = []
+    res = ""
+    for key,value in count.items():
+        heapq.heappush(h,[-value,key])
+
+    while len(h) > 1:
+        v1,k1 = heapq.heappop(h)
+        v2,k2 = heapq.heappop(h)
+        res += k1 + k2
+        v1 += 1
+        v2 += 1
+        if v1 < 0:
+            heapq.heappush(h,[v1,k1])
+        if v2 < 0:
+            heapq.heappush(h,[v2,k2])
+    if h:
+        res += heapq.heappop(h)[1]
+    return res
 
 ______________________________________________________________________________
 
@@ -1751,24 +1968,6 @@ ______________________________________________________________________________
 
 ______________________________________________________________________________
 stop
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
 ______________________________________________________________________________
 
 ______________________________________________________________________________
