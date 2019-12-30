@@ -1964,70 +1964,462 @@ def reorganizeString(self, S: str) -> str:
 
 ______________________________________________________________________________
 
+460. LFU Cache          (DoubleLinkedList)
+class Node:
+    def __init__(self,key,value):
+        self.key = key
+        self.val = value
+        self.cnt = 1
+        self.next = None
+        self.prev = None
+
+class DoubleLinkedLists:
+    def __init__(self):
+        self.head = Node(0,0)
+        self.tail = Node(0,0)
+        self.len = 0
+        self.head.next = self.tail
+        self.tail.prev = self.head
+    
+    def addHead(self,node):
+        next1 = self.head.next
+        self.head.next = node
+        node.prev = self.head
+        node.next = next1
+        next1.prev = node
+        self.len += 1
+    
+    def remove(self,node):
+        previous = node.prev
+        next1 = node.next
+        previous.next = next1
+        next1.prev = previous
+        self.len -= 1
+    
+    def removeTail(self):
+        p = self.tail.prev
+        self.remove(p)
+        
+        
+class LFUCache:
+
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.size = 0
+        self.table = collections.defaultdict(Node)
+        self.freq = collections.defaultdict(DoubleLinkedLists)
+
+    def get(self, key: int) -> int:
+        if key not in self.table: return -1
+        node = self.table[key]
+        self.freq[node.cnt].remove(node)
+        node.cnt += 1
+        self.freq[node.cnt].addHead(node)
+        return node.val
+
+    def put(self, key: int, value: int) -> None:
+        if self.capacity == 0: return
+        if key in self.table:
+            node = self.table[key]
+            node.val = value
+            self.get(key)
+            return
+        else:
+            if self.capacity == self.size:
+                for linkedlist in self.freq.values():
+                    if linkedlist.len > 0:
+                        node = linkedlist.tail.prev
+                        del self.table[node.key]
+                        self.size -= 1
+                        linkedlist.removeTail()
+                        break
+            node = Node(key,value)
+            self.table[key] = node
+            self.size += 1
+            self.freq[node.cnt].addHead(node)
+______________________________________________________________________________
+
+124. Binary Tree Maximum Path Sum       O(N), space is O(H)
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def maxPathSum(self, root: TreeNode) -> int:
+        if not root:
+            return -2**31
+        self.res = float('-inf')
+        self.dfs(root)
+        return self.res
+    
+    def dfs(self,root):
+        left = max(self.dfs(root.left),0) if root.left else 0
+        right = max(self.dfs(root.right),0) if root.right else 0
+        cur = left + right + root.val
+        self.res = max(self.res, cur)
+        return root.val + max(left,right)
+______________________________________________________________________________
+
+4. Median of Two Sorted Arrays      (Binary search)
+    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
+        n1,n2 = len(nums1),len(nums2)
+        if n1 > n2:
+            return self.findMedianSortedArrays(nums2,nums1)
+        k = (n1+n2+1)//2
+        l,r=0,n1
+        while l < r:
+            m1 = l + (r-l)//2
+            m2 = k - m1
+            if nums1[m1] < nums2[m2-1]:
+                l = m1 + 1
+            else:
+                r = m1
+        m1 = l
+        m2 = k - l
+        c1 = max(nums1[m1-1] if m1 > 0 else float('-inf'), nums2[m2-1] if m2 > 0 else float('-inf'))
+        if (n1+n2)%2==1:
+            return c1
+        c2 = min(nums1[m1] if m1 < n1 else float('inf'), nums2[m2] if m2 < n2 else float('inf'))
+        return (c1+c2)/2
+______________________________________________________________________________
+
+1192. Critical Connections in a Network         log(u+v)    u: # of nodes,
+                                                            v: # of neighbors
+    def criticalConnections(self, n: int, connections: List[List[int]]) -> List[List[int]]:
+        graph = collections.defaultdict(list)
+        for x,y in connections:
+            graph[x].append(y)
+            graph[y].append(x)
+        ranks = [i for i in range(n)]
+        visited = [False]*n
+        prevNode = -1
+        currentNode = 0
+        currentRank = 0
+        self.res = []
+        self.dfs(graph,visited,ranks,currentRank,prevNode,currentNode)
+        return self.res
+    
+    def dfs(self,graph,visited,ranks,currentRank,prevNode,currentNode):
+        visited[currentNode] = True
+        ranks[currentNode] = currentRank
+        for nextNode in graph[currentNode]:
+            if nextNode == prevNode:
+                continue
+            if not visited[nextNode]:
+                self.dfs(graph,visited,ranks,currentRank+1,currentNode,nextNode)
+            ranks[currentNode] = min(ranks[currentNode],ranks[nextNode])
+            if ranks[nextNode] == currentRank + 1:
+                self.res.append([currentNode,nextNode])
+
+______________________________________________________________________________
+
+1. Two Sum
+def twoSum(self, nums: List[int], target: int) -> List[int]:
+    if not nums: return []
+    hashmap = dict()
+    for i in range(len(nums)):
+        if nums[i] in hashmap:
+            return [hashmap[nums[i]],i]
+        else:
+            hashmap[target-nums[i]] = i
+______________________________________________________________________________
+
+167. Two Sum II - Input array is sorted
+def twoSum(self, numbers: List[int], target: int) -> List[int]:
+    if not numbers: return []
+    l,r = 0, len(numbers)-1
+    while l < r:
+        if numbers[l] + numbers[r] == target:
+            return [l+1, r+1]
+        elif numbers[l] + numbers[r] < target:
+            l += 1
+        else:
+            r -= 1
+    return []
+______________________________________________________________________________
+
+653. Two Sum IV - Input is a BST
+
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def findTarget(self, root: TreeNode, k: int) -> bool:
+        if not root: return root
+        hashmap = dict()
+        stack = []
+        stack.append(root)
+        while stack:
+            n = len(stack)
+            for _ in range(n):
+                node = stack.pop()
+                if node.val in hashmap:
+                    return True
+                hashmap[k-node.val] = node.val
+                if node.right:
+                    stack.append(node.right)
+                if node.left:
+                    stack.append(node.left)
+        return False
+______________________________________________________________________________
+
+371. Sum of Two Integers
+def getSum(self, a: int, b: int) -> int:
+    mask = 0x100000000
+    max_int = 0x7FFFFFFF
+    while b != 0:
+        carry = a&b
+        a = (a^b) % mask
+        b = (carry<<1) % mask
+    return a if a <= max_int else a | (~mask+1)
+______________________________________________________________________________
+
+1232. Check If It Is a Straight Line
+def checkStraightLine(self, coordinates: List[List[int]]) -> bool:
+    res = set()
+    for i in range(1,len(coordinates)):
+        dx = coordinates[i][0] - coordinates[i-1][0]
+        dy = coordinates[i][1] - coordinates[i-1][1]
+        if dx == 0:
+            res.add(0)
+        else:
+            res.add(dy/dx)
+    return True if len(res) == 1 else False
+______________________________________________________________________________
+
+290. Word Pattern
+def wordPattern(self, pattern: str, str: str) -> bool:
+    if not pattern and not str:
+        return False
+    words = str.split(" ")
+    if len(words) != len(pattern):
+        return False
+    match = {}
+    visited = []
+    for x,y in zip(pattern,words):
+        if x in match:
+            if match[x] != y:
+                return False
+        else:
+            if y in visited:
+                return False
+            visited.append(y)
+            match[x] = y
+    return True
+
+______________________________________________________________________________
+
+70. Climbing Stairs
+def climbStairs(self, n: int) -> int:
+    if n == 0: return 0
+    prev,cur = 0,1
+    for i in range(n):
+        prev,cur = cur,prev+cur
+    return cur
+______________________________________________________________________________
+
+53. Maximum Subarray
+def maxSubArray(self, nums: List[int]) -> int:
+    if not nums: return 0
+    subSum = nums[0]
+    ans = nums[0]
+    for n in nums[1:]:
+        subSum = max(n,subSum+n)
+        ans = max(ans,subSum)
+    return ans
+______________________________________________________________________________
+
+482. License Key Formatting
+def licenseKeyFormatting(self, s: str, k: int) -> str:
+    if not s: return ''
+    s =''.join(s.upper().split('-'))
+    s = s[::-1]
+    res = ''
+    for i in range(len(s)):
+        if i%k == 0 and i != 0:
+            res += '-' + s[i]
+        else:
+            res += s[i]
+    return res[::-1]
+______________________________________________________________________________
+
+1160. Find Words That Can Be Formed by Characters
+def countCharacters(self, words: List[str], chars: str) -> int:       
+    res = 0
+    for word in words:
+        cnt = 0
+        temp = list(chars)
+        for w in word:
+            if w in temp:
+                temp.remove(w)
+                cnt += 1
+        if cnt == len(word):
+            res += cnt
+    return res
+______________________________________________________________________________
+
+121. Best Time to Buy and Sell Stock
+def maxProfit(self, prices: List[int]) -> int:
+    if not prices: return 0
+    m = prices[0]
+    maxProfit = 0
+    for n in prices[1:]:
+        m = min(m,n)
+        maxProfit = max(maxProfit,n-m)
+    return maxProfit
+______________________________________________________________________________
+
+20. Valid Parentheses
+def isValid(self, s: str) -> bool:
+    if not s: return True
+    if len(s)%2 != 0: return False
+    table = {
+        ')':'(',
+        '}':'{',
+        ']':'['
+    }
+    stack = []
+    for c in s:
+        if c == '{' or c == '[' or c == '(':
+            stack.append(c)
+        else:
+            if not stack or stack[-1] != table[c]:
+                return False
+            stack.pop()
+    return True if not stack else False
+______________________________________________________________________________
+
+112. Path Sum
+def hasPathSum(self, root: TreeNode, sum: int) -> bool:
+    if not root: return False
+    if root.left == root.right and root.val == sum:
+        return True
+    return self.hasPathSum(root.left,sum-root.val) or self.hasPathSum(root.right,sum-root.val) 
+______________________________________________________________________________
+
+734. Sentence Similarity
+def areSentencesSimilar(self, words1: List[str], words2: List[str], pairs: List[List[str]]) -> bool:
+    if len(words1) != len(words2): return False
+    for w1,w2 in zip(words1,words2):
+        if not(w1==w2 or [w1,w2] in pairs or [w2,w1] in pairs):
+            return False
+    return True
+______________________________________________________________________________
+
+252. Meeting Rooms
+def canAttendMeetings(self, intervals: List[List[int]]) -> bool:
+    if not intervals:
+        return True
+    intervals.sort(key = lambda x:x[0])
+    occupy = intervals[0]
+    for interval in intervals[1:]:
+        if interval[0] < occupy[1]:
+            return False
+        occupy = interval
+    return True
+______________________________________________________________________________
+
+110. Balanced Binary Tree
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def isBalanced(self, root: TreeNode) -> bool:
+        if not root: return True
+        if self.dfs(root) == -1:
+            return False
+        return True
+    
+    def dfs(self,root):
+        if not root: return 0
+        left = self.dfs(root.left) if root.left else 0
+        if left == -1: return -1
+        right = self.dfs(root.right) if root.right else 0
+        if right == -1: return -1
+        return max(left,right)+1 if abs(left-right) <= 1 else -1
+
+______________________________________________________________________________
+
+104. Maximum Depth of Binary Tree
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def maxDepth(self, root: TreeNode) -> int:
+        if not root: return 0
+        return self.depth(root)
+    
+    def depth(self,root):
+        if not root: return 0
+        return max(self.depth(root.left),self.depth(root.right))+1
+______________________________________________________________________________
+
+111. Minimum Depth of Binary Tree
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def minDepth(self, root: TreeNode) -> int:
+        if not root: return 0
+        if root.left and root.right:
+            return min(self.minDepth(root.left),self.minDepth(root.right)) + 1
+        elif not root.left:
+            return self.minDepth(root.right) + 1
+        elif not root.right:
+            return self.minDepth(root.left)+1
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    def minDepth(self, root: TreeNode) -> int:
+        if not root: return 0
+        q = collections.deque([])
+        q.append([root,1])
+        while q:
+            node,depth = q.popleft()
+            children = [node.left,node.right]
+            if not any(children):
+                return depth
+            if node.left:
+                q.append([node.left,depth+1])
+            if node.right:
+                q.append([node.right,depth+1])
+
+______________________________________________________________________________
+
+______________________________________________________________________________
+
+______________________________________________________________________________
+
+______________________________________________________________________________
+
+______________________________________________________________________________
+
+______________________________________________________________________________
+
+______________________________________________________________________________
+
+______________________________________________________________________________
+
+______________________________________________________________________________
+
 ______________________________________________________________________________
 
 ______________________________________________________________________________
 stop
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
 ______________________________________________________________________________
 
 ______________________________________________________________________________
