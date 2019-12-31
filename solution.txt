@@ -2400,40 +2400,294 @@ class Solution:
 
 ______________________________________________________________________________
 
+559. Maximum Depth of N-ary Tree
+class Node:
+    def __init__(self, val=None, children=None):
+        self.val = val
+        self.children = children
+"""
+class Solution:
+    def maxDepth(self, root: 'Node') -> int:
+        if not root: return 0
+        return self.dfs(root)
+    
+    def dfs(self,root):
+        if not root: return 0
+        if not root.children: return 1
+        return max(self.dfs(child) for child in root.children if child) + 1
 ______________________________________________________________________________
+
+9. Palindrome Number
+def isPalindrome(self, x: int) -> bool:
+    if x < 0 or x%10 == 0 and x != 0: return False
+    reverse = 0
+    while reverse < x:
+        reverse = reverse*10 + x%10
+        x //= 10
+    return x == reverse or x == reverse//10
+______________________________________________________________________________
+
+234. Palindrome Linked List
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def isPalindrome(self, head: ListNode) -> bool:
+        if not head: return True
+        slow = head
+        fast = head
+        while fast.next and fast.next.next:
+            slow = slow.next
+            fast = fast.next.next
+        second = slow.next
+        slow.next = None
+        
+        prev = None
+        while second:
+            next1 = second.next
+            second.next = prev
+            prev = second
+            second = next1
+        
+        while prev and head:
+            if head.val != prev.val:
+                return False
+            head = head.next
+            prev = prev.next
+
+        return True
+______________________________________________________________________________
+
+14. Longest Common Prefix
+def longestCommonPrefix(self, words: List[str]) -> str:
+    if not words:
+        return ""
+    prefix = words[0]
+    for word in words[1:]:
+        while word.find(prefix) != 0:
+            prefix = prefix[:-1]
+            if len(prefix) == 0:
+                return ""
+    return prefix
+______________________________________________________________________________
+
+26. Remove Duplicates from Sorted Array
+def removeDuplicates(self, nums: List[int]) -> int:
+    if not nums: return 0
+    index = 0
+    while index < len(nums)-1:
+        if nums[index] == nums[index+1]:
+            del nums[index+1]
+            index -= 1
+        index += 1
+    return len(nums)
+______________________________________________________________________________
+
+1290. Convert Binary Number in a Linked List to Integer
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def getDecimalValue(self, head: ListNode) -> int:
+        if not head: return head
+        ans = 0
+        while head:
+            ans = ans*10 + head.val
+            head = head.next
+        return int(str(ans),2)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+def getDecimalValue(self, head: ListNode) -> int:
+    if not head: return head
+    ans = 0
+    while head:
+        ans = ans*10 + head.val
+        head = head.next
+    return self.convert(str(ans))
+
+def convert(self,b):
+    val = 0
+    for i,digit in enumerate(reversed(b)):
+        if digit == '1':
+            val += 2**i
+    return val
+______________________________________________________________________________
+
+1119. Remove Vowels from a String
+def removeVowels(self, s: str) -> str:
+    if not s: return ''
+    res = ''
+    vowels = set('aeiou')
+    for chars in s:
+        if chars in vowels:
+            continue
+        res += chars
+    return res
+______________________________________________________________________________
+
+1108. Defanging an IP Address
+def defangIPaddr(self, address: str) -> str:
+    if not address:
+        return address
+    res = ''
+    for c in address:
+        if c == '.':
+            res += "[.]"
+        else:
+            res += c
+    return res
+______________________________________________________________________________
+
+938. Range Sum of BST
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def rangeSumBST(self, root: TreeNode, L: int, R: int) -> int:
+        if not root: return 0
+        self.res = 0
+        self.dfs(root,L,R)
+        return self.res
+    
+    def dfs(self,root,l,r):
+        if not root: return
+        if root.val > l:
+            self.dfs(root.left,l,r)
+        if root.val < r:
+            self.dfs(root.right,l,r)
+        if l<= root.val <= r:
+            self.res += root.val
+______________________________________________________________________________
+
+1086. High Five
+def highFive(self, items: List[List[int]]) -> List[List[int]]:
+    table = collections.defaultdict(list)
+    for id,score in items:
+        heapq.heappush(table[id],score)
+        if len(table[id]) > 5:
+            heapq.heappop(table[id])
+    return [[id,sum(scores)//5] for id, scores in table.items()]
+______________________________________________________________________________
+
+977. Squares of a Sorted Array
+def sortedSquares(self, nums: List[int]) -> List[int]:
+    if not nums: return []
+    l,r = 0, len(nums)-1
+    res = []
+    while l <= r:
+        if nums[l]**2 < nums[r]**2:
+            res.append(nums[r]**2)
+            r -= 1
+        else:
+            res.append(nums[l]**2)
+            l += 1
+    return res[::-1]
+______________________________________________________________________________
+
+1304. Find N Unique Integers Sum up to Zero
+    def sumZero(self, n: int) -> List[int]:
+        if n <= 0: return []
+        if n == 1: return [0]
+        res = []
+        for i in range(1,n):
+            res.append(i)
+        res.append(-sum(res))
+        return res
+______________________________________________________________________________
+
+42. Trapping Rain Water
+def trap(self, height: List[int]) -> int:
+    if not height: return 0
+    leftmax = height[0]
+    rightmax = height[-1]
+    l,r = 0, len(height)-1
+    res = 0
+    while l <= r:
+        leftmax = max(leftmax,height[l])
+        rightmax = max(rightmax,height[r])
+        if leftmax < rightmax:
+            res += leftmax - height[l]
+            l += 1
+        else:
+            res += rightmax - height[r]
+            r -= 1
+    return res
+______________________________________________________________________________
+
+32. Longest Valid Parentheses
+def longestValidParentheses(self, s: str) -> int:
+    if not s: return 0
+    stack = [-1]
+    res = 0
+    for index,char in enumerate(s):
+        if char == '(':
+            stack.append(index)
+        else:
+            stack.pop()
+            if stack:
+                res = max(res,index-stack[-1])
+            else:
+                stack.append(index)
+    return res
+______________________________________________________________________________
+
+144. Binary Tree Preorder Traversal
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def preorderTraversal(self, root: TreeNode) -> List[int]:
+        if not root: return []
+        res = []
+        stack = [root]
+        while stack:
+            node = stack.pop()
+            if node.right:
+                stack.append(node.right)
+            if node.left:
+                stack.append(node.left)
+            res.append(node.val)
+        return res
 
 ______________________________________________________________________________
 
-______________________________________________________________________________
+145. Binary Tree Postorder Traversal
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
 
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
+class Solution:
+    def postorderTraversal(self, root: TreeNode) -> List[int]:
+        if not root: return
+        stack = []
+        stack.append(root)
+        res = []
+        while stack:
+            node = stack.pop()
+            if node.left:
+                stack.append(node.left)
+            if node.right:
+                stack.append(node.right)
+            res.insert(0,node.val)
+        return res
 ______________________________________________________________________________
 
 ______________________________________________________________________________
 stop
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
 ______________________________________________________________________________
 
 ______________________________________________________________________________
