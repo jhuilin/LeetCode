@@ -2686,20 +2686,106 @@ class Solution:
         return res
 ______________________________________________________________________________
 
+1293. Shortest Path in a Grid with Obstacles Elimination
+def shortestPath(self, grid: List[List[int]], k: int) -> int:
+    rows = len(grid)
+    cols = len(grid[0])
+    visited = [[float('inf') for _ in range(cols)] for _ in range(rows)]
+    q = collections.deque([])
+    q.append([0,0,0,0])
+    dirs = [(1,0),(-1,0),(0,1),(0,-1)]
+    while q:
+        n = len(q)
+        for _ in range(n):
+            r,c,o,s = q.popleft()
+            if r == rows -1 and c == cols - 1:
+                return s
+            for dr,dc in dirs:
+                if 0<=dr+r<rows and 0<=dc+c<cols:
+                    do = o + grid[dr+r][dc+c]
+                    if do >= visited[dr+r][dc+c] or do > k:
+                        continue
+                    visited[dr+r][dc+c] = do
+                    q.append([dr+r,dc+c,do,s+1])
+    return -1
+______________________________________________________________________________
+
+143. Reorder List
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def reorderList(self, head: ListNode) -> None:
+        """
+        Do not return anything, modify head in-place instead.
+        """
+        if not head: return head
+        slow = head
+        fast = head
+        while fast.next and fast.next.next:
+            slow = slow.next
+            fast = fast.next.next
+        second = slow.next
+        slow.next = None
+        
+        prev = None
+        while second:
+            next1 = second.next
+            second.next = prev
+            prev = second
+            second = next1
+        
+        while prev and head:
+            nextp = prev.next
+            nexth = head.next
+            head.next = prev
+            prev.next = nexth
+            head = nexth
+            prev = nextp
+______________________________________________________________________________
+
+430. Flatten a Multilevel Doubly Linked List
+
+class Node:
+    def __init__(self, val, prev, next, child):
+        self.val = val
+        self.prev = prev
+        self.next = next
+        self.child = child
+"""
+class Solution:
+    def flatten(self, head: 'Node') -> 'Node':
+        if not head: return head
+        cur = head
+        while cur:
+            if cur.child:
+                node = self.flatten(cur.child)
+                cur.child = None
+                next1 = cur.next
+                cur.next = node
+                node.prev = cur
+                while node.next:
+                    node = node.next
+                if next1:
+                    node.next = next1
+                    next1.prev = node
+                cur = next1
+            else:
+                cur = cur.next
+        return head
+
+______________________________________________________________________________
+
+______________________________________________________________________________
+
+______________________________________________________________________________
+
+______________________________________________________________________________
+
 ______________________________________________________________________________
 stop
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
 ______________________________________________________________________________
 
 ______________________________________________________________________________
