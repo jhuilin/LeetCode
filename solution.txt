@@ -2775,6 +2775,311 @@ class Solution:
             else:
                 cur = cur.next
         return head
+______________________________________________________________________________
+
+348. Design Tic-Tac-Toe
+class TicTacToe:
+
+    def __init__(self, n: int):
+        """
+        Initialize your data structure here.
+        """
+        self.n = n
+        self.rows = [0]*n
+        self.cols = [0]*n
+        self.d = 0
+        self.ad = 0
+
+    def move(self, row: int, col: int, player: int) -> int:
+        """
+        Player {player} makes a move at ({row}, {col}).
+        @param row The row of the board.
+        @param col The column of the board.
+        @param player The player, can be either 1 or 2.
+        @return The current winning condition, can be either:
+                0: No one wins.
+                1: Player 1 wins.
+                2: Player 2 wins.
+        """
+        if self.validate(row,col,player):
+            return player
+        return 0
+    
+    def validate(self,r,c,player):
+        offset = 1 if player == 1 else -1
+        self.rows[r] += offset
+        self.cols[c] += offset
+        if r == c:
+            self.d += offset
+        if r + c == self.n-1:
+            self.ad += offset
+        m = offset*self.n
+        return self.rows[r] == m or self.cols[c] == m or self.d ==m or self.ad == m
+
+
+# Your TicTacToe object will be instantiated and called as such:
+# obj = TicTacToe(n)
+# param_1 = obj.move(row,col,player)
+______________________________________________________________________________
+
+127. Word Ladder
+    def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
+        if endWord not in wordList:
+            return 0
+        table = collections.defaultdict(list)
+        n = len(beginWord)
+        for i in range(n):
+            for word in wordList:
+                k = word[:i]+'*'+word[i+1:]
+                table[k].append(word)
+        
+        visited = set()
+        q = collections.deque([])
+        q.append([beginWord,1])
+        while q:
+            word,ts = q.popleft()
+            if word in visited:
+                continue
+            visited.add(word)
+            if word == endWord:
+                return ts
+            for i in range(n):
+                k = word[:i]+'*'+word[i+1:]
+                if k in table:
+                    for wd in table[k]:
+                        q.append([wd,ts+1])
+                        table[k] = []
+        return 0
+______________________________________________________________________________
+
+341. Flatten Nested List Iterator
+# """
+# This is the interface that allows for creating nested lists.
+# You should not implement it, or speculate about its implementation
+# """
+#class NestedInteger:
+#    def isInteger(self) -> bool:
+#        """
+#        @return True if this NestedInteger holds a single integer, rather than a nested list.
+#        """
+#
+#    def getInteger(self) -> int:
+#        """
+#        @return the single integer that this NestedInteger holds, if it holds a single integer
+#        Return None if this NestedInteger holds a nested list
+#        """
+#
+#    def getList(self) -> [NestedInteger]:
+#        """
+#        @return the nested list that this NestedInteger holds, if it holds a nested list
+#        Return None if this NestedInteger holds a single integer
+#        """
+
+class NestedIterator:
+    def __init__(self, nestedList: [NestedInteger]):
+        self.q = collections.deque()
+        self.dfs(nestedList)
+    
+    def dfs(self,List):
+        for element in List:
+            if element.isInteger():
+                self.q.append(element.getInteger())
+            else:
+                self.dfs(element.getList())
+    
+    def next(self) -> int:
+        return self.q.popleft()
+    
+    def hasNext(self) -> bool:
+        return len(self.q) > 0
+         
+
+# Your NestedIterator object will be instantiated and called as such:
+# i, v = NestedIterator(nestedList), []
+# while i.hasNext(): v.append(i.next())
+______________________________________________________________________________
+
+103. Binary Tree Zigzag Level Order Traversal   (BFS)
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def zigzagLevelOrder(self, root: TreeNode) -> List[List[int]]:
+        if not root: return []
+        res = []
+        q = collections.deque([])
+        q.append([root,0])
+        while q:
+            node,level = q.popleft()
+            if level == len(res):
+                res.append([])
+            if level%2 == 0:
+                res[level].insert(0,node.val)
+            else:
+                res[level].append(node.val)
+            if node.right:
+                q.append([node.right,level+1])
+            if node.left:
+                q.append([node.left,level+1])
+        return res
+______________________________________________________________________________
+
+380. Insert Delete GetRandom O(1)
+class RandomizedSet:
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.list = []
+        self.table = dict()
+        
+
+    def insert(self, val: int) -> bool:
+        """
+        Inserts a value to the set. Returns true if the set did not already contain the specified element.
+        """
+        if val in self.table: return False
+        self.table[val] = len(self.list)
+        self.list.append(val)
+        return True
+        
+
+    def remove(self, val: int) -> bool:
+        """
+        Removes a value from the set. Returns true if the set contained the specified element.
+        """
+        if val not in self.table: return False
+        idx = self.table[val]
+        last1 = self.list[-1]
+        self.list[idx] = last1
+        self.table[last1] = idx
+        del self.table[val]
+        self.list.pop()
+        return True
+
+    def getRandom(self) -> int:
+        """
+        Get a random element from the set.
+        """
+        return random.choice(self.list)
+        
+
+
+# Your RandomizedSet object will be instantiated and called as such:
+# obj = RandomizedSet()
+# param_1 = obj.insert(val)
+# param_2 = obj.remove(val)
+# param_3 = obj.getRandom()
+______________________________________________________________________________
+
+456. 132 Pattern
+class Solution:
+    def find132pattern(self, nums: List[int]) -> bool:
+        if len(nums) < 3: return False
+        stack = []
+        third = float('-inf')
+        for n in nums[::-1]:
+            if n < third:
+                return True
+            while stack and n > stack[-1]:
+                third = stack.pop()
+            stack.append(n)
+        return False
+______________________________________________________________________________
+
+207. Course Schedule            （topological）O(V+E)
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        table = collections.defaultdict(list)
+        for x,y in prerequisites:
+            table[x].append(y)
+        visited = [0]*numCourses
+        for i in range(numCourses):
+            if not self.dfs(table,visited,i):
+                return False
+        return True
+    
+    def dfs(self,table,visited,index):
+        if visited[index] == 2: return True
+        if visited[index] == 1: return False
+        visited[index] = 1
+        for i in table[index]:
+            if not self.dfs(table,visited,i):
+                return False
+        visited[index] = 2
+        return True
+______________________________________________________________________________
+
+503. Next Greater Element II
+    def nextGreaterElements(self, nums: List[int]) -> List[int]:
+        n = len(nums)
+        stack = []
+        res = [-1]*n
+        for i in range(2*n-1,-1,-1):
+            while stack and nums[i%n] >= stack[-1]:
+                stack.pop()
+            if stack:
+                res[i%n] = stack[-1]
+            stack.append(nums[i%n])
+        return res
+______________________________________________________________________________
+
+210. Course Schedule II
+    def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+        table = collections.defaultdict(list)
+        for x,y in prerequisites:
+            table[x].append(y)
+        visited = [0]*numCourses
+        self.res = []
+        for i in range(numCourses):
+            if not self.dfs(table,visited,i):
+                return []
+        return self.res
+    
+    def dfs(self,table,visited,index):
+        if visited[index] == 1: return False
+        if visited[index] == 2: return True
+        visited[index] = 1
+        for i in table[index]:
+            if not self.dfs(table,visited,i):
+                return False
+        visited[index] = 2
+        self.res.append(index)
+        return True
+______________________________________________________________________________
+
+556. Next Greater Element III
+class Solution:
+    def nextGreaterElement(self, n: int) -> int:
+        if n < 10: return -1
+        nums = list(str(n))
+        i = len(nums)-1
+        while i > 0 and nums[i-1] >= nums[i]:
+            i -= 1
+        if i == 0: return -1
+        
+        j = len(nums)-1
+        while nums[j] <= nums[i-1]:
+            j -= 1
+        nums[j],nums[i-1] = nums[i-1],nums[j]
+        
+        n = len(nums)-1
+        while i < n:
+            nums[i],nums[n] = nums[n],nums[i]
+            i += 1
+            n -= 1
+
+        mx = 2**31 - 1
+        res = int(''.join(nums))
+        return res if res < mx else -1
+______________________________________________________________________________
+
+______________________________________________________________________________
+
+______________________________________________________________________________
 
 ______________________________________________________________________________
 
@@ -2786,32 +3091,6 @@ ______________________________________________________________________________
 
 ______________________________________________________________________________
 stop
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
 ______________________________________________________________________________
 
 ______________________________________________________________________________
