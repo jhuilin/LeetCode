@@ -3077,6 +3077,176 @@ class Solution:
         return res if res < mx else -1
 ______________________________________________________________________________
 
+238. Product of Array Except Self
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        if not nums: return []
+        n = len(nums)
+        res = [0]*n
+        res[0] = 1
+        for i in range(1,n):
+            res[i] = res[i-1]*nums[i-1]
+        prod = 1
+        for i in range(n-1,-1,-1):
+            res[i] *= prod
+            prod *= nums[i]
+        return res
+______________________________________________________________________________
+
+1007. Minimum Domino Rotations For Equal Row
+    def minDominoRotations(self, A: List[int], B: List[int]) -> int:
+        table = collections.defaultdict(int)
+        for a,b in zip(A,B):
+            table[a] += 1
+            table[b] += 1
+        mx = target = 0
+        for key, count in table.items():
+            if count > mx:
+                mx = count
+                target = key
+        if mx < len(A):
+            return -1
+        
+        a=b=0
+        for i in range(len(A)):
+            if A[i] == B[i]:
+                if A[i] != target:
+                    return -1
+            elif A[i] == target:
+                a += 1
+            elif B[i] == target:
+                b += 1
+            else:
+                return -1
+        return min(a,b)
+______________________________________________________________________________
+
+22. Generate Parentheses
+    def generateParenthesis(self, n: int) -> List[str]:
+        if n <= 0: return []
+        self.res = []
+        self.dfs(0,0,n,'')
+        return self.res
+    
+    def dfs(self,left,right,n,path):
+        if left == n and right == n:
+            self.res.append(path)
+            return
+        if left < n:
+            self.dfs(left+1,right,n,path+'(')
+        if right < left:
+            self.dfs(left,right+1,n,path+')')
+______________________________________________________________________________
+
+394. Decode String
+def decodeString(self, s: str) -> str:
+    stack = []
+    curString = ''
+    curNumber = 0
+    for chars in s:
+        if chars == '[':
+            stack.append(curNumber)
+            stack.append(curString)
+            curString = ''
+            curNumber = 0
+        elif chars == ']':
+            preString = stack.pop()
+            preNumber = stack.pop()
+            curString = preString + preNumber*curString
+        
+        elif chars.isdigit():
+            curNumber = curNumber*10 + int(chars)
+        else:
+            curString += chars
+    return curString
+______________________________________________________________________________
+
+6. ZigZag Conversion
+def convert(self, s: str, numRows: int) -> str:
+    if numRows == 1 or len(s) < numRows:
+        return s
+    res = ['' for _ in range(numRows)]
+    cnt,step = 0,0
+    for c in s:
+        res[cnt] += c
+        if cnt == numRows - 1:
+            step = -1
+        elif cnt == 0:
+            step = 1
+        cnt += step
+    return ''.join(res)
+______________________________________________________________________________
+
+1091. Shortest Path in Binary Matrix
+def shortestPathBinaryMatrix(self, grid: List[List[int]]) -> int:
+    if grid[0][0] == 1 or grid[-1][-1] == 1:
+        return -1
+    rows = len(grid)
+    cols = len(grid[0])
+    q = collections.deque([])
+    q.append([0,0,1])
+    dirs = [(-1,-1),(-1,0),(-1,1),(0,-1),(0,1),(1,-1),(1,0),(1,1)]
+    while q:
+        r,c,s = q.popleft()
+        if r == rows - 1 and c == cols - 1:
+            return s
+        for dr,dc in dirs:
+            if 0<=dr+r<rows and 0<=dc+c<cols and grid[dr+r][dc+c] == 0:
+                q.append([dr+r,dc+c,s+1])
+                grid[dr+r][dc+c] = 1
+    return -1
+______________________________________________________________________________
+
+109. Convert Sorted List to Binary Search Tree
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def sortedListToBST(self, head: ListNode) -> TreeNode:
+        if not head: return None
+        if not head.next: return TreeNode(head.val)
+        slow = head
+        fast = head.next
+        while fast.next and fast.next.next:
+            slow = slow.next
+            fast = fast.next.next
+        mid = slow.next
+        slow.next = None
+        root = TreeNode(mid.val)
+        root.left = self.sortedListToBST(head)
+        root.right = self.sortedListToBST(mid.next)
+        return root
+______________________________________________________________________________
+332. Reconstruct Itinerary      Eulerian path, Hierholzer Algorithm
+                                O(n + nlogn + n)
+                                n for build graph | nlogn to sort | Hierholzer:n
+def findItinerary(self, tickets: List[List[str]]) -> List[str]:
+    graph = collections.defaultdict(list)
+    for x,y in tickets:
+        graph[x].append(y)
+    for key,values in graph.items():
+        values.sort(reverse=True)
+    res = collections.deque([])
+    self.dfs(graph,'JFK',res)
+    return res
+
+def dfs(self,graph,start,res):
+    while graph[start]:
+        s = graph[start].pop()
+        self.dfs(graph,s,res)
+    res.appendleft(start)
+______________________________________________________________________________
+
+______________________________________________________________________________
+
 ______________________________________________________________________________
 
 ______________________________________________________________________________
@@ -3091,24 +3261,6 @@ ______________________________________________________________________________
 
 ______________________________________________________________________________
 stop
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
 ______________________________________________________________________________
 
 ______________________________________________________________________________
