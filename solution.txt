@@ -3245,41 +3245,340 @@ def dfs(self,graph,start,res):
     res.appendleft(start)
 ______________________________________________________________________________
 
+2. Add Two Numbers
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
+        l3 = head = ListNode(0)
+        carry = 0
+        while l1 and l2:
+            add = l1.val + l2.val + carry
+            carry = 1 if add >= 10 else 0
+            l3.next = ListNode(add%10)
+            l1,l2,l3=l1.next,l2.next,l3.next
+        l = l1 if l1 else l2
+        while l:
+            add = l.val + carry
+            carry = 1 if add >=10 else 0
+            l3.next = ListNode(add%10)
+            l,l3 = l.next, l3.next
+        if carry:
+            l3.next = ListNode(1)
+        return head.next
+______________________________________________________________________________
+
+445. Add Two Numbers II             (stacks)
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
+        stack1 = []
+        stack2 = []
+        while l1:
+            stack1.append(l1.val)
+            l1 = l1.next
+        while l2:
+            stack2.append(l2.val)
+            l2 = l2.next
+        prev = None
+        carry = 0
+        while stack1 or stack2 or carry:
+            x = stack1.pop() if stack1 else 0
+            y = stack2.pop() if stack2 else 0
+            add = x + y + carry
+            carry = 1 if add >= 10 else 0
+            newNode = ListNode(add%10)
+            newNode.next = prev
+            prev = newNode
+        return prev
+______________________________________________________________________________
+
+15. 3Sum
+class Solution:
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        if not nums: return []
+        nums.sort()
+        res = []
+        n = len(nums)
+        for i in range(n-2):
+            if nums[i] + nums[i+1] + nums[i+2] > 0:
+                break
+            if nums[i] + nums[n-1] + nums[n-2] < 0:
+                continue
+            if i > 0 and nums[i] == nums[i-1]:
+                continue
+            l,r = i+1,n-1
+            while l < r:
+                add = nums[i]+nums[l]+nums[r]
+                if add == 0:
+                    res.append([nums[i],nums[l],nums[r]])
+                    while l+1 < r and nums[l] == nums[l+1]:
+                        l += 1
+                    l += 1
+                    while r-1 > l and nums[r] == nums[r-1]:
+                        r -= 1
+                    r -= 1
+                elif add > 0:
+                    r -= 1
+                else:
+                    l += 1
+        return res
+______________________________________________________________________________
+
+259. 3Sum Smaller
+    def threeSumSmaller(self, nums: List[int], target: int) -> int:
+        if not nums: return 0
+        nums.sort()
+        n = len(nums)
+        cnt = 0
+        for i in range(n-2):
+            cnt += self.twoSum(nums,i+1,target-nums[i])
+        return cnt
+    
+    def twoSum(self,nums,start,target):
+        l,r = start,len(nums)-1
+        cnt = 0
+        while l < r:
+            if nums[l] + nums[r] < target:
+                cnt += r-l
+                l += 1
+            else:
+                r -= 1
+        return cnt
+            
+
+______________________________________________________________________________
+
+16. 3Sum Closest
+    def threeSumClosest(self, nums: List[int], target: int) -> int:
+        if not nums: return 0
+        res = float('inf')
+        n = len(nums)
+        nums.sort()
+        for i in range(n-2):
+            if i > 0 and nums[i-1] == nums[i]:
+                continue
+            l,r = i+1,n-1
+            while l < r:
+                add = nums[i]+nums[l]+nums[r]
+                if add == target:
+                    return target
+                if abs(add-target) < abs(res-target):
+                    res = add
+                if add > target:
+                    while r-1 > l and nums[r-1] == nums[r]:
+                        r -= 1
+                    r -= 1
+                else:
+                    while l+1 < r and nums[l+1] == nums[l]:
+                        l += 1
+                    l += 1
+        return res
+
+______________________________________________________________________________
+
+18. 4Sum
+    def fourSum(self, nums: List[int], target: int) -> List[List[int]]:
+        if not nums: return []
+        nums.sort()
+        n = len(nums)
+        res = []
+        for i in range(n-3):
+            if i > 0 and nums[i] == nums[i-1]:
+                continue
+            if nums[i] + nums[i+1] + nums[i+2] + nums[i+3] > target:
+                break
+            if nums[i] + nums[-1] + nums[-2] + nums[-3] < target:
+                continue
+            for j in range(i+1,n-2):
+                if j > i+1 and nums[j] == nums[j-1]:
+                    continue
+                l,r = j+1,n-1
+                while l < r:
+                    add = nums[i] + nums[j] + nums[l] + nums[r]
+                    if add == target:
+                        res.append([nums[i],nums[j],nums[l],nums[r]])
+                        while r-1 > l and nums[r-1] == nums[r]:
+                            r -= 1
+                        r -= 1
+                        while l+1 < r and nums[l+1] == nums[l]:
+                            l += 1
+                        l += 1
+                    elif add > target:
+                        r -= 1
+                    else:
+                        l += 1
+        return res
+______________________________________________________________________________
+
+454. 4Sum II
+    def fourSumCount(self, A: List[int], B: List[int], C: List[int], D: List[int]) -> int:
+        hashmap = collections.defaultdict(int)
+        res = 0
+        for a in A:
+            for b in B:
+                add = 0 - a - b
+                hashmap[add] += 1
+        for c in C:
+            for d in D:
+                add = c + d
+                if add in hashmap:
+                    res += hashmap[add]
+        return res
+______________________________________________________________________________
+
+718. Maximum Length of Repeated Subarray
+def findLength(self, A: List[int], B: List[int]) -> int:
+    dp = [[0 for c in range(len(A))] for r in range(len(B))]
+    for r in range(len(B)):
+        for c in range(len(A)):
+            if B[r] == A[c]:
+                if r == 0 or c == 0:
+                    dp[r][c] = 1
+                else:
+                    dp[r][c] = dp[r-1][c-1] + 1
+    return max(map(max,dp))
+______________________________________________________________________________
+
+713. Subarray Product Less Than K   (Two pointers)
+    def numSubarrayProductLessThanK(self, nums: List[int], k: int) -> int:
+        if not nums: return 0
+        l,r,prod,n = 0,0,1,len(nums)
+        res = 0
+        while r < n:
+            prod *= nums[r]
+            while prod >= k and l <= r:
+                prod //= nums[l]
+                l += 1
+            res += r-l+1
+            r += 1
+        return res
+______________________________________________________________________________
+
+560. Subarray Sum Equals K      (preSum)
+    def subarraySum(self, nums: List[int], k: int) -> int:
+        if not nums: return 0
+        hashmap = collections.defaultdict(int)
+        hashmap[0] = 1
+        res,preSum = 0,0
+        for n in nums:
+            preSum += n
+            if preSum - k in hashmap:
+                res += hashmap[preSum-k]
+            hashmap[preSum] += 1
+        return res
+______________________________________________________________________________
+
+523. Continuous Subarray Sum
+    def checkSubarraySum(self, nums: List[int], k: int) -> bool:
+        if not nums or len(nums) < 2: return False
+        hashmap = dict()
+        hashmap[0] = -1
+        add = 0
+        for i in range(len(nums)):
+            add += nums[i]
+            if k!=0:
+                add %= k
+            if add in hashmap:
+                if i - hashmap[add] > 1:
+                    return True
+            else:
+                hashmap[add] = i
+        return False
+
+______________________________________________________________________________
+
+279. Perfect Squares        (dp) O(N*sqrt(N))
+
+    def numSquares(self, n: int) -> int:
+        dp = [n]*(n+1)
+        dp[0] = 0
+        dp[1] = 1
+        for i in range(2,n+1):
+            j = 1
+            while j*j <= i:
+                dp[i] = min(dp[i],dp[i-j*j]+1)
+                j += 1
+        return dp[-1]
+______________________________________________________________________________
+
+11. Container With Most Water   (two pointers)
+    def maxArea(self, height: List[int]) -> int:
+        if not height: return 0
+        res = 0
+        l,r = 0, len(height)-1
+        while l < r:
+            if height[l] > height[r]:
+                res = max(res,(r-l)*height[r])
+                r -= 1
+            else:
+                res = max(res,(r-l)*height[l])
+                l += 1
+        return res
+______________________________________________________________________________
+
+75. Sort Colors
+def sortColors(self, nums: List[int]) -> None:
+    """
+    Do not return anything, modify nums in-place instead.
+    """
+    red, white, blue = 0, 0, len(nums)-1
+    while white <= blue:
+        if nums[white] == 0:
+            nums[white],nums[red] = nums[red],nums[white]
+            white += 1
+            red += 1
+        elif nums[white] == 1:
+            white += 1
+        else:
+            nums[white],nums[blue] = nums[blue], nums[white]
+            blue -= 1
+______________________________________________________________________________
+
+152. Maximum Product Subarray           (dp)
+    def maxProduct(self, nums: List[int]) -> int:
+        if not nums:
+            return 0
+        mi = mx = res = nums[0]
+        for n in nums[1:]:
+            x = max(n,mx*n,mi*n)
+            y = min(n,mx*n,mi*n)
+            mx = y
+            mi = x
+            res = max(res,mx,mi)
+        return res
+______________________________________________________________________________
+
+300. Longest Increasing Subsequence
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        if not nums: return 0
+        dp = []
+        for i, num in enumerate(nums):
+            l,r = 0, len(dp)-1
+            while l <= r:
+                mid = l + (r-l)//2
+                if dp[mid] < num:
+                    l = mid + 1
+                else:
+                    r = mid - 1
+            if l == len(dp):
+                dp.append(num)
+            else:
+                dp[l] = num
+        return len(dp)
 ______________________________________________________________________________
 
 ______________________________________________________________________________
 
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
 stop
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-
 
 ______________________________________________________________________________
 
