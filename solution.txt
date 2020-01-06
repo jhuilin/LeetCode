@@ -71,26 +71,6 @@ def findNumbers(self, nums: List[int]) -> int:
     return res
 ______________________________________________________________________________
 
-937. Reorder Data in Log Files
-class Solution:
-    def reorderLogFiles(self, logs: List[str]) -> List[str]:
-        if not logs:
-            return []
-        nums = []
-        letters = []
-        for log in logs:
-            s = log.split()
-            if s[1].isdigit():
-                nums.append(log)
-            else:
-                content = " ".join(s[1:])
-                id = s[0]
-                letters.append([content,id])
-        letters.sort()
-        return [letter[1]+" "+letter[0] for letter in letters] + nums
-
-______________________________________________________________________________
-
 21. Merge Two Sorted Lists  O(m+n)
 # class ListNode:
 #     def __init__(self, x):
@@ -686,6 +666,209 @@ ______________________________________________________________________________
 
 Amazon OA:
 -----------
+Question:  Top N Buzzwords
+
+The comparison of strings is case-insensitive. If the value of topToys is more
+than the number of toys, return the names of only the toys mentioned in the
+quotes. If toys are mentioned an equal number of times in quotes,
+sort alphabetically.
+
+Input:
+numToys = 6
+topToys = 2
+toys = ["elmo", "elsa", "legos", "drone", "tablet", "warcraft"]
+numQuotes = 6
+quotes = [
+"Elmo is the hottest of the season! Elmo will be on every kid's wishlist!",
+"The new Elmo dolls are super high quality",
+"Expect the Elsa dolls to be very popular this year, Elsa!",
+"Elsa and Elmo are the toys I'll be buying for my kids, Elsa is good",
+"For parents of older kids, look into buying them a drone",
+"Warcraft is slowly rising in popularity ahead of the holiday season"
+];
+
+Output:
+["elmo", "elsa"]
+
+from collections import defaultdict
+
+def topNBuzzWords(numToys, topToys, toys, numQuotes, quotes):
+    if not topToys or not toys or not quotes:
+        return []
+    toys = set(t.lower() for t in toys)
+    print(toys)
+    # toys = set(toys)
+    hmap = defaultdict(int)
+    for quote in quotes:
+        quote = quote.split(' ')
+        for word in quote:
+            word = word.lower()
+            if word in toys:
+                hmap[word] += 1
+            elif (word[:-1] in toys and not word[-1].isalpha() and not word[-1].isdigit()):
+                hmap[word[:-1]] += 1
+#QZÍ„ÇZaz´
+    return sorted(hmap, key = lambda x: (-hmap[x], x))[:topToys]
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+import re
+import heapq
+
+def buildHashTable(toys, quotes):
+    hash_table = dict()
+    for a_toy in toys:
+        hash_table[a_toy.lower()] = 0
+    for a_quote in quotes:
+        filtered_quote = re.split(r' |!|,', a_quote)
+        for a_word in filtered_quote:
+            if a_word.lower() in hash_table:
+                hash_table[a_word.lower()] += 1
+    return hash_table
+
+def find_top_toys(toys, quotes, topToys):
+    hash_table = buildHashTable(toys, quotes)
+    heap_counter = []
+    for k,v in hash_table.items():
+        heapq.heappush(heap_counter, (-v,k))
+    return [k for v,k in heapq.nsmallest(topToys, heap_counter, key=lambda x: x[0])]
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Question: Zombie Matrix
+
+Given a 2D grid, each cell is either a zombie or a human. Zombies can turn
+adjacent (up/down/left/right) human beings into zombies every day. Find out how
+many days does it take to infect all humans?
+
+Input:
+matrix, a 2D integer array where a[i][j] = 1 represents a zombie on the cell
+and a[i][j] = 0 represents a human on the cell.
+
+Output:
+Return an integer represent how many days does it take to infect all humans.
+Return -1 if no zombie exists.
+
+import collections
+def humanDays(matrix):    (BFS)
+    rows = len(matrix)
+    cols = len(matrix[0])
+    human = 0
+    q = collections.deque([])
+    for r in range(rows):
+        for c in range(cols):
+            if matrix[r][c] == 1:
+                q.append([r,c])
+            else:
+                human += 1
+    if not q:       // make sure there is zombi exit
+        return -1
+    if human == 0:  // if not human there just return 0
+        return 0
+    day = 0
+    dirs = [(0,1),(0,-1),(1,0),(-1,0)]
+    while q:
+        n = len(q)
+        for i in range(n):
+            r,c = q.popleft()
+            for dr,dc in dirs:
+                if 0<=dr+r<rows and 0<=dc+c<cols and matrix[dr+r][dc+c] == 0:
+                    matrix[dr+r][dc+c] = 1
+                    q.append([dr+r,dc+c])
+        day += 1
+    return day-1
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ Question:   Maximal Minimum Value Path I
+ Given a two 2D integer array, find the max score of a path from the upper left
+ cell to bottom right cell. The score of a path is the minimum value in that path.
+
+import heapq
+def maxPathScore(matrix):
+    if not matrix: return 0
+    rows = len(matrix)
+    cols = len(matrix[0])
+    visited = [[False for c in range(cols)] for r in range(rows)]
+    h = []
+    heapq.heappush(h,(-matrix[0][0],0,0))
+    visited[0][0] = True
+    dirs = [(1,0),(0,1)]
+    score = float('inf')
+    while h:
+        v,r,c = heapq.heappop(h)
+        score = min(-v,score)
+        if r == rows-1 and c == cols-1:
+            return score
+        for dr,dc in dirs:
+            if 0<=dr+r<rows and 0<=dc+c<cols and not visited[dr+r][dc+c]:
+                heapq.heappush(h,(-matrix[dr+r][dc+c],dr+r,dc+c))
+                visited[dr+r][dc+c] = True
+    return 0
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+ Question: Max Of Min Altitudes
+
+ def find(matrix):
+    if not matrix:
+        return 0
+    rows = len(matrix)
+    cols = len(matrix[0])
+    h = []
+    heapq.heappush(h, (float('-inf'), 0, 0))
+    matrix[-1][-1] = float('inf')
+    score = float('inf')
+    dirs = [(0, 1), (1, 0)]
+    while h:
+        v, r, c = heapq.heappop(h)
+        score = min(-v, score)
+        if r == rows-1 and c == cols-1:
+            return score
+        for dr, dc in dirs:
+            if dr+r < rows and dc+c < cols:
+                heapq.heappush(h, (-matrix[dr+r][dc+c], dr+r, dc+c))
+    return 0
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Question: Maximal Minimum Value Path II
+
+import heapq
+def maxPathScore(matrix):
+    if not matrix: return 0
+    rows = len(matrix)
+    cols = len(matrix[0])
+    visited = [[False for c in range(cols)] for r in range(rows)]
+    h = []
+    heapq.heappush(h,[-matrix[0][0],0,0])
+    visited[0][0] = True
+    score = float('inf')
+    dirs = [(1,0),(-1,0),(0,1),(0,-1)]
+    while h:
+        v,r,c = heapq.heappop(h)
+        score = min(score,-v)
+        if r == rows-1 and c == cols-1:
+            return score
+        for dr,dc in dirs:
+            if 0<=dr+r<rows and 0<=dc+c<cols and not visited[dr+r][dc+c]:
+                heapq.heappush(h,[-matrix[dr+r][dc+c],dr+r,dc+c])
+                visited[dr+r][dc+c] = True
+    return 0
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ 937. Reorder Data in Log Files
+ class Solution:
+     def reorderLogFiles(self, logs: List[str]) -> List[str]:
+         if not logs:
+             return []
+         nums = []
+         letters = []
+         for log in logs:
+             s = log.split()
+             if s[1].isdigit():
+                 nums.append(log)
+             else:
+                 content = " ".join(s[1:])
+                 id = s[0]
+                 letters.append([content,id])
+         letters.sort()
+         return [letter[1]+" "+letter[0] for letter in letters] + nums
+
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Question: Optimal Utilization
 
 Given 2 lists 'a' and 'b'. Each element is a pair of integers where the first
@@ -700,28 +883,79 @@ b = [[1, 2], [2, 3], [3, 4], [4, 5]]
 target = 10
 Output: [[2, 4], [3, 2]]
 
-def findPair(a, b, target):   (Two Pointers)
-    if not a or not b:
-        return []
-    ans = []
-    diff = float('inf')
-    a.sort(key=lambda x: x[1])
-    b.sort(key=lambda x: x[1])
-    left, right = 0, len(b) - 1
-    while left < len(a) and right >= 0:
-        aid, avalue = a[left]
-        bid, bvalue = b[right]
-        if target - avalue - bvalue == diff:
-            ans.append([aid, bid])
-        elif avalue + bvalue <= target and target - avalue - bvalue < diff:
-            diff = target - avalue - bvalue
-            ans.clear()
-            ans.append([aid, bid])
-        if avalue + bvalue < target:
-            left += 1
-        else:
-            right -= 1
+def findPair(a, b, target):
+  if not a or not b:
+      return []
+  ans = []
+  diff = float('inf')
+  a.sort(key=lambda x: x[1])
+  b.sort(key=lambda x: x[1])
+  for aid, avalue in a:
+      left, right = 0, len(b) - 1
+      while left <= right:
+          mid = left + (right - left) // 2
+          bid, bvalue = b[mid]
+          if target - avalue - bvalue == diff:
+              ans.append([aid, bid])
+          elif avalue + bvalue <= target and target - avalue - bvalue < diff:
+              diff = target - avalue - bvalue
+              ans.clear()
+              ans.append([aid, bid])
+          if avalue + bvalue <= target:
+              left = mid + 1
+          else:
+              right = mid - 1
+  return ans
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Question:
+1167. Minimum Cost to Connect Sticks / Min Cost to Connect Ropes / Merge Files
+
+Input: ropes = [8, 4, 6, 12]
+Output: 58
+Explanation: The optimal way to connect ropes is as follows
+1. Connect the ropes of length 4 and 6 (cost is 10). Ropes after connecting: [8, 10, 12]
+2. Connect the ropes of length 8 and 10 (cost is 18). Ropes after connecting: [18, 12]
+3. Connect the ropes of length 18 and 12 (cost is 30).
+Total cost to connect the ropes is 10 + 18 + 30 = 58
+
+def connectSticks(self, sticks: List[int]) -> int:
+    if not sticks: return 0
+    heapq.heapify(sticks)
+    ans = 0
+    while len(sticks) > 1:
+        x,y = heapq.heappop(sticks), heapq.heappop(sticks)
+        s = x + y
+        ans += s
+        heapq.heappush(sticks,s)
     return ans
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Treasure II
+  def treasure(matrix):
+    rows = len(matrix)
+    cols = len(matrix[0])
+    res = rows*cols
+    for r in range(rows):
+      for c in range(cols):
+          if matrix[r][c] == 'S':
+            temp = bfs(matrix,r,c)
+            res = min(res,temp)
+    return res
+
+  def bfs(matrix,row,col):
+    q = collections.deque([])
+    q.append([row,col,0])
+    visited = [[False for c in range(len(matrix[0]))] for r in range(matrix)]
+    visited[row][cols] = True
+    dirs = [(0,1),(0,-1),(1,0),(-1,0)]
+    while q:
+      r,c,s = q.popleft()
+      if matrix[r][c] == 'X':
+        return s
+      for dr,dc in dirs:
+        if 0<=dr+r<len(matrix) and 0<=dc+c<len(matrix[0]) and not visited[dr+r][dc+c]:
+          q.append([dr+r,dc+c,s+1])
+          visited[dr+r][dc+c] = True
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 Question: Treasure Island / Min Distance to Remove the Obstacle (BFS)
@@ -771,8 +1005,94 @@ def findPath(matrix):         (BFS) O(MxN)
   return -1
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Question: Find Pair With Given Sum /  Movies on flight
 
-1135. Connecting cities with minimum cost/Min Cost to Connect All Nodes
+Input: nums = [20, 50, 40, 25, 30, 10], target = 90
+Output: [1, 5]
+Explanation:
+nums[0] + nums[2] = 20 + 40 = 60 = 90 - 30
+nums[1] + nums[5] = 50 + 10 = 60 = 90 - 30
+You should return the pair with the largest number.
+
+def findPair(nums, target):
+    if not nums:
+        return []
+    target -= 30
+    ans = [0]*2
+    hashmap = dict()
+    maxValue = float('-inf')
+    for index, num in enumerate(nums):
+        if target - num in hashmap:
+            if target - num > maxValue or num > maxValue:
+                ans[0] = hashmap[target-num]
+                ans[1] = index
+                maxValue = max(num, target-num)
+        else:
+            hashmap[num] = index
+    return ans
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Questions: Favorite Genres
+
+Input:
+userSongs = {
+   "David": ["song1", "song2", "song3", "song4", "song8"],
+   "Emma":  ["song5", "song6", "song7"]
+},
+songGenres = {
+   "Rock":    ["song1", "song3"],
+   "Dubstep": ["song7"],
+   "Techno":  ["song2", "song4"],
+   "Pop":     ["song5", "song6"],
+   "Jazz":    ["song8", "song9"]
+}
+
+Output: {
+   "David": ["Rock", "Techno"],
+   "Emma":  ["Pop"]
+}
+
+Explanation:
+David has 2 Rock, 2 Techno and 1 Jazz song. So he has 2 favorite genres.
+Emma has 2 Pop and 1 Dubstep song. Pop is Emma's favorite genre.
+
+def favGenres(userSongs, songGenres):     // tabke care of empty input
+    output = {}
+    for user in userSongs:
+        song_list = userSongs[user]
+        count = collections.defaultdict(int)
+        for genre in songGenres:
+            for song in song_list:
+                if song in songGenres[genre]:
+                    count[genre] += 1
+        output[user] = [key for key, value in count.items() if value == max(count.values())]
+
+    return output
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Question: Two Sum - Unique Pairs
+
+def pair(nums, target):
+    match = {}
+    visited = set()
+    cnt = 0
+    for n in nums:
+        if n in match:
+            if target - n not in visited:
+                visited.add(target-n)
+                cnt += 1
+        else:
+            match[target - n] = n
+    return cnt
+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+Question:
+1135. Connecting cities with minimum cost/Min Time to Merge Files
 def __init__(self,n):
     self.parent = [i for i in range(n+1)]
     self.rank = [i for i in range(n+1)]
@@ -863,6 +1183,17 @@ class Solution:
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
  Min Cost to Repair Edges     (UnionFind)
+
+ Input:
+ n = 5,
+ edges = [[1, 2], [2, 3], [3, 4], [4, 5], [1, 5]],
+ edgesToRepair = [[1, 2, 12], [3, 4, 30], [1, 5, 8]]
+Output: 20
+Explanation:
+There are 3 connected components due to broken edges: [1], [2, 3] and [4, 5].
+We can connect these components into a single component by repearing the edges
+between nodes 1 and 2, and nodes 1 and 5 at a minimum cost 12 + 8 = 20.
+
  class UnionFind:
      def __init__(self, n):
          self.parent = [i for i in range(n + 1)]
@@ -1113,21 +1444,32 @@ def longestVowelsOnlySubstring(s):
           self.dfs(digits, start+2, subset + self.table[int(digits[start: start + 2])])
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Question: Point of Lattice
+
+def gcd(self, a, b):
+    if b == 0:
+        return a
+    return self.gcd(b, a % b)
+
+def lattice(self, ax, ay, bx, by):
+    dx = bx - ax
+    dy = by - ay
+
+    # rotate 90
+    rx = dy
+    ry = -dy
+
+    # reduce
+    gcd = abs(self.gcd(rx, ry))
+    rx /= gcd
+    ry /= gcd
+    return [bx+rx, by+ry]
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
 Amazon End:
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-______________________________________________________________________________
-
-1167. Minimum Cost to Connect Sticks / Connect Ropes / Merge Files
-def connectSticks(self, sticks: List[int]) -> int:
-    if not sticks: return 0
-    heapq.heapify(sticks)
-    ans = 0
-    while len(sticks) > 1:
-        x,y = heapq.heappop(sticks), heapq.heappop(sticks)
-        s = x + y
-        ans += s
-        heapq.heappush(sticks,s)
-    return ans
 ______________________________________________________________________________
 
 59. Spiral Matrix II
@@ -1738,11 +2080,11 @@ class Solution:
         while head and head.next:
             p1 = head
             p2 = head.next
-            
+
             p1.next = p2.next
             p2.next = p1
             temp.next = p2
-            
+
             temp = p1
             head = p1.next
         return dummy.next
@@ -1796,7 +2138,7 @@ def solveSudoku(self, board: List[List[str]]) -> None:
     """
     Do not return anything, modify board in-place instead.
     """
-    self.dfs(board)  
+    self.dfs(board)
 
 def validate(self,board,r,c):
     value = board[r][c]
@@ -1843,7 +2185,7 @@ class Solution:
                 temp.append(lists[-1])
             lists = temp
         return lists[0]
-        
+
     def merge(self,list1,list2):
         dummy = ListNode(0)
         l = dummy
@@ -1855,12 +2197,12 @@ class Solution:
                 l.next = list2
                 list2 = list2.next
             l = l.next
-            
+
         if not list1:
             l.next = list2
         if not list2:
             l.next = list1
-            
+
         return dummy.next
 ______________________________________________________________________________
 
@@ -1980,7 +2322,7 @@ class DoubleLinkedLists:
         self.len = 0
         self.head.next = self.tail
         self.tail.prev = self.head
-    
+
     def addHead(self,node):
         next1 = self.head.next
         self.head.next = node
@@ -1988,19 +2330,19 @@ class DoubleLinkedLists:
         node.next = next1
         next1.prev = node
         self.len += 1
-    
+
     def remove(self,node):
         previous = node.prev
         next1 = node.next
         previous.next = next1
         next1.prev = previous
         self.len -= 1
-    
+
     def removeTail(self):
         p = self.tail.prev
         self.remove(p)
-        
-        
+
+
 class LFUCache:
 
     def __init__(self, capacity: int):
@@ -2053,7 +2395,7 @@ class Solution:
         self.res = float('-inf')
         self.dfs(root)
         return self.res
-    
+
     def dfs(self,root):
         left = max(self.dfs(root.left),0) if root.left else 0
         right = max(self.dfs(root.right),0) if root.right else 0
@@ -2100,7 +2442,7 @@ ______________________________________________________________________________
         self.res = []
         self.dfs(graph,visited,ranks,currentRank,prevNode,currentNode)
         return self.res
-    
+
     def dfs(self,graph,visited,ranks,currentRank,prevNode,currentNode):
         visited[currentNode] = True
         ranks[currentNode] = currentRank
@@ -2249,7 +2591,7 @@ def licenseKeyFormatting(self, s: str, k: int) -> str:
 ______________________________________________________________________________
 
 1160. Find Words That Can Be Formed by Characters
-def countCharacters(self, words: List[str], chars: str) -> int:       
+def countCharacters(self, words: List[str], chars: str) -> int:
     res = 0
     for word in words:
         cnt = 0
@@ -2330,7 +2672,7 @@ class Solution:
         if self.dfs(root) == -1:
             return False
         return True
-    
+
     def dfs(self,root):
         if not root: return 0
         left = self.dfs(root.left) if root.left else 0
@@ -2352,7 +2694,7 @@ class Solution:
     def maxDepth(self, root: TreeNode) -> int:
         if not root: return 0
         return self.depth(root)
-    
+
     def depth(self,root):
         if not root: return 0
         return max(self.depth(root.left),self.depth(root.right))+1
@@ -2402,7 +2744,7 @@ class Solution:
     def maxDepth(self, root: 'Node') -> int:
         if not root: return 0
         return self.dfs(root)
-    
+
     def dfs(self,root):
         if not root: return 0
         if not root.children: return 1
@@ -2436,14 +2778,14 @@ class Solution:
             fast = fast.next.next
         second = slow.next
         slow.next = None
-        
+
         prev = None
         while second:
             next1 = second.next
             second.next = prev
             prev = second
             second = next1
-        
+
         while prev and head:
             if head.val != prev.val:
                 return False
@@ -2547,7 +2889,7 @@ class Solution:
         self.res = 0
         self.dfs(root,L,R)
         return self.res
-    
+
     def dfs(self,root,l,r):
         if not root: return
         if root.val > l:
@@ -2721,14 +3063,14 @@ class Solution:
             fast = fast.next.next
         second = slow.next
         slow.next = None
-        
+
         prev = None
         while second:
             next1 = second.next
             second.next = prev
             prev = second
             second = next1
-        
+
         while prev and head:
             nextp = prev.next
             nexth = head.next
@@ -2796,7 +3138,7 @@ class TicTacToe:
         if self.validate(row,col,player):
             return player
         return 0
-    
+
     def validate(self,r,c,player):
         offset = 1 if player == 1 else -1
         self.rows[r] += offset
@@ -2824,7 +3166,7 @@ ______________________________________________________________________________
             for word in wordList:
                 k = word[:i]+'*'+word[i+1:]
                 table[k].append(word)
-        
+
         visited = set()
         q = collections.deque([])
         q.append([beginWord,1])
@@ -2871,20 +3213,20 @@ class NestedIterator:
     def __init__(self, nestedList: [NestedInteger]):
         self.q = collections.deque()
         self.dfs(nestedList)
-    
+
     def dfs(self,List):
         for element in List:
             if element.isInteger():
                 self.q.append(element.getInteger())
             else:
                 self.dfs(element.getList())
-    
+
     def next(self) -> int:
         return self.q.popleft()
-    
+
     def hasNext(self) -> bool:
         return len(self.q) > 0
-         
+
 
 # Your NestedIterator object will be instantiated and called as such:
 # i, v = NestedIterator(nestedList), []
@@ -2928,7 +3270,7 @@ class RandomizedSet:
         """
         self.list = []
         self.table = dict()
-        
+
 
     def insert(self, val: int) -> bool:
         """
@@ -2938,7 +3280,7 @@ class RandomizedSet:
         self.table[val] = len(self.list)
         self.list.append(val)
         return True
-        
+
 
     def remove(self, val: int) -> bool:
         """
@@ -2958,7 +3300,7 @@ class RandomizedSet:
         Get a random element from the set.
         """
         return random.choice(self.list)
-        
+
 
 
 # Your RandomizedSet object will be instantiated and called as such:
@@ -2993,7 +3335,7 @@ ______________________________________________________________________________
             if not self.dfs(table,visited,i):
                 return False
         return True
-    
+
     def dfs(self,table,visited,index):
         if visited[index] == 2: return True
         if visited[index] == 1: return False
@@ -3030,7 +3372,7 @@ ______________________________________________________________________________
             if not self.dfs(table,visited,i):
                 return []
         return self.res
-    
+
     def dfs(self,table,visited,index):
         if visited[index] == 1: return False
         if visited[index] == 2: return True
@@ -3052,12 +3394,12 @@ class Solution:
         while i > 0 and nums[i-1] >= nums[i]:
             i -= 1
         if i == 0: return -1
-        
+
         j = len(nums)-1
         while nums[j] <= nums[i-1]:
             j -= 1
         nums[j],nums[i-1] = nums[i-1],nums[j]
-        
+
         n = len(nums)-1
         while i < n:
             nums[i],nums[n] = nums[n],nums[i]
@@ -3097,7 +3439,7 @@ ______________________________________________________________________________
                 target = key
         if mx < len(A):
             return -1
-        
+
         a=b=0
         for i in range(len(A)):
             if A[i] == B[i]:
@@ -3118,7 +3460,7 @@ ______________________________________________________________________________
         self.res = []
         self.dfs(0,0,n,'')
         return self.res
-    
+
     def dfs(self,left,right,n,path):
         if left == n and right == n:
             self.res.append(path)
@@ -3144,7 +3486,7 @@ def decodeString(self, s: str) -> str:
             preString = stack.pop()
             preNumber = stack.pop()
             curString = preString + preNumber*curString
-        
+
         elif chars.isdigit():
             curNumber = curNumber*10 + int(chars)
         else:
@@ -3334,7 +3676,7 @@ ______________________________________________________________________________
         for i in range(n-2):
             cnt += self.twoSum(nums,i+1,target-nums[i])
         return cnt
-    
+
     def twoSum(self,nums,start,target):
         l,r = start,len(nums)-1
         cnt = 0
@@ -3345,7 +3687,7 @@ ______________________________________________________________________________
             else:
                 r -= 1
         return cnt
-            
+
 
 ______________________________________________________________________________
 
@@ -3602,9 +3944,9 @@ ______________________________________________________________________________
         res = [0]*2
         for n in nums:
             x ^= n
-        
+
         diff = x & (-x)
-        
+
         for n in nums:
             if n & diff == 0:
                 res[0] ^= n
@@ -3628,7 +3970,7 @@ class Solution:
         mx = float('inf')
         mi = float('-inf')
         return self.dfs(root,mx,mi)
-    
+
     def dfs(self,root,mx,mi):
         if not root: return True
         if mi >= root.val or root.val >= mx:
@@ -3670,7 +4012,7 @@ class Solution:
         self.paths = []
         self.dfs(root,0)
         return sum(self.paths)
-    
+
     def dfs(self,root,path):
         if not root: return
         if root.left == root.right:
@@ -3693,7 +4035,7 @@ class Solution:
         self.res = []
         self.dfs(root,"")
         return self.res
-    
+
     def dfs(self,root,path):
         if not root: return
         if root.left == root.right:
@@ -3707,7 +4049,7 @@ def hasPathSum(self, root: TreeNode, sum: int) -> bool:
     if not root: return False
     if root.left == root.right and root.val == sum:
         return True
-    return self.hasPathSum(root.left,sum-root.val) or self.hasPathSum(root.right,sum-root.val) 
+    return self.hasPathSum(root.left,sum-root.val) or self.hasPathSum(root.right,sum-root.val)
 ______________________________________________________________________________
 
 113. Path Sum II
@@ -3724,7 +4066,7 @@ class Solution:
         self.res = []
         self.dfs(root,sum,[])
         return self.res
-    
+
     def dfs(self,root,sum,path):
         if not root: return
         if root.left == root.right and root.val == sum:
@@ -3747,7 +4089,7 @@ class Solution:
         self.res = 0
         self.dfs(root)
         return self.res
-        
+
     def dfs(self,root):
         if not root: return 0
         l = self.dfs(root.left)
@@ -3781,7 +4123,43 @@ ______________________________________________________________________________
         return fast
 ______________________________________________________________________________
 
+542. 01 Matrix
+def updateMatrix(self, matrix: List[List[int]]) -> List[List[int]]:
+    if not matrix: return matrix
+    q = collections.deque([])
+    rows = len(matrix)
+    cols = len(matrix[0])
+    for r in range(rows):
+        for c in range(cols):
+            if matrix[r][c] == 0:
+                q.append([r,c])
+            else:
+                matrix[r][c] = -1
+    dirs = [(0,1),(0,-1),(1,0),(-1,0)]
+    while q:
+        n = len(q)
+        for i in range(n):
+            r,c = q.popleft()
+            for dr,dc in dirs:
+                if 0<=dr+r<rows and 0<=dc+c<cols and matrix[dr+r][dc+c] == -1:
+                    matrix[dr+r][dc+c] = matrix[r][c] + 1
+                    q.append([dr+r,dc+c])
+    return matrix
+
 ______________________________________________________________________________
+
+973. K Closet Points to Origin
+
+def kClosest(self, points: List[List[int]], K: int) -> List[List[int]]:
+    h = []
+    for point in points:
+        d = self.distance(point[0],point[1])
+        heapq.heappush(h,(d,point))
+    return [heapq.heappop(h)[1] for _ in range(K)]
+
+def distance(self,x,y):
+    d = x**2 + y**2
+    return math.sqrt(d)
 
 ______________________________________________________________________________
 
