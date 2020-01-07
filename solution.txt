@@ -4298,6 +4298,7 @@ class Solution:
 
     def dfs(self,root):
         if not root: return 0
+        if root.left == root.right: return 0
         l = self.dfs(root.left)
         r = self.dfs(root.right)
         left = right = 0
@@ -4369,33 +4370,301 @@ def distance(self,x,y):
 
 ______________________________________________________________________________
 
+96. Unique Binary Search Trees
+class Solution:                         O(n) catalan number sequence
+    def numTrees(self, n: int) -> int:
+        c = 1
+        for i in range(n):
+            c = c*2*(2*i+1)/(i+2)
+        return int(c)
+
+
+class Solution:                         O(n^2) dp
+    def numTrees(self, n: int) -> int:
+        dp = [0]*(n+1)
+        dp[0],dp[1] = 1,1
+        for i in range(2,n+1):
+            for j in range(1,i+1):
+                dp[i] += dp[j-1] * dp[i-j]
+        return dp[n]
 ______________________________________________________________________________
+
+416. Partition Equal Subset Sum
+class Solution:
+    def canPartition(self, nums: List[int]) -> bool:
+        total = sum(nums)
+        if total % 2 != 0:
+            return False
+        target = total // 2
+        dp = [True] + [False]*target
+        for num in nums:
+            for index in range(target,num-1,-1):
+                dp[index] = dp[index] or dp[index-num]
+        return dp[target]
 
 ______________________________________________________________________________
 
+130. Surrounded Regions
+class Solution:
+    def solve(self, board: List[List[str]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+        if not board: return
+        rows = len(board)
+        cols = len(board[0])
+        for r in range(rows):
+            if board[r][0] == 'O':
+                self.dfs(board,r,0)
+            if board[r][cols-1] == 'O':
+                self.dfs(board,r,cols-1)
+        for c in range(cols):
+            if board[0][c] == 'O':
+                self.dfs(board,0,c)
+            if board[rows-1][c] == 'O':
+                self.dfs(board,rows-1,c)
+        for r in range(rows):
+            for c in range(cols):
+                if board[r][c] == "O":
+                    board[r][c] = 'X'
+                elif board[r][c] == '*':
+                    board[r][c] = 'O'
+
+    def dfs(self,board,r,c):
+        board[r][c] = '*'
+        dirs = [(0,1),(0,-1),(1,0),(-1,0)]
+        for dr,dc in dirs:
+            if 0<=dr+r<len(board) and 0<=dc+c<len(board[0]) and board[dr+r][dc+c] == 'O':
+                self.dfs(board,dr+r,dc+c)
 ______________________________________________________________________________
+
+343. Integer Break
+class Solution:
+    def integerBreak(self, n: int) -> int:
+        if n == 2: return 1
+        if n == 3: return 2
+        res = 1
+        while n > 4:
+            res *= 3
+            n -= 3
+        return res*n
 
 ______________________________________________________________________________
 
+309. Best Time to Buy and Sell Stock with Cooldown
+class Solution:
+    def maxProfit(self, prices: List[int]) -> int:
+        if not prices: return 0
+        buy = [0]*len(prices)
+        sell = [0]*len(prices)
+        buy[0] = -prices[0]
+        for i in range(1,len(prices)):
+            buy[i] = max(buy[i-1],(sell[i-2] if i > 1 else 0)-prices[i])
+            sell[i] = max(sell[i-1], buy[i-1]+prices[i])
+        return sell[-1]
 ______________________________________________________________________________
+
+714. Best Time to Buy and Sell Stock with Transaction Fee
+
+class Solution:
+    def maxProfit(self, prices: List[int], fee: int) -> int:
+        if not prices: return 0
+        cash = 0
+        hold = -prices[0]
+        for i in range(1,len(prices)):
+            cash = max(cash,hold+prices[i]-fee)
+            hold = max(hold,cash-prices[i])
+        return cash
+______________________________________________________________________________
+
+388. Longest Absolute File Path
+class Solution:
+    def lengthLongestPath(self, input: str) -> int:
+        stack = [(-1,0)]        #(depth,length)
+        length = 0
+        lines = input.split('\n')
+        for line in lines:
+            depth = line.count('\t')
+            line = line.replace('\t','')
+            while stack and depth <= stack[-1][0]:
+                stack.pop()
+            if '.' not in line:
+                stack.append([depth,stack[-1][1]+len(line)+1])
+            else:
+                length = max(length,stack[-1][1]+len(line))
+        return length
 
 ______________________________________________________________________________
 
-______________________________________________________________________________
+490. The Maze
+class Solution:
+    def hasPath(self, maze: List[List[int]], start: List[int], destination: List[int]) -> bool:
+        if not maze: return False
+        rows = len(maze)
+        cols = len(maze[0])
+        visited = set()
+        return self.dfs(maze,start[0],start[1],destination,visited,rows,cols)
+
+    def dfs(self,maze,r,c,destination,visited,rows,cols):
+        if [r,c] == destination: return True
+        if (r,c) in visited: return False
+        visited.add((r,c))
+        dirs = [(1,0),(-1,0),(0,1),(0,-1)]
+        for dr,dc in dirs:
+            nr,nc = r,c
+            while 0<=dr+nr<rows and 0<=dc+nc<cols and maze[dr+nr][dc+nc] == 0:
+                nr += dr
+                nc += dc
+            if self.dfs(maze,nr,nc,destination,visited,rows,cols):
+                return True
+        return False
 
 ______________________________________________________________________________
 
+692. Top K Frequent Words
+class Solution:
+    def topKFrequent(self, words: List[str], k: int) -> List[str]:
+        table = collections.defaultdict(int)
+        for word in words:
+            table[word] += 1
+        h = []
+        for word, cnt in table.items():
+            heapq.heappush(h,[-cnt,word])
+        return [heapq.heappop(h)[1] for i in range(k)]
 ______________________________________________________________________________
+
+215. Kth Largest Element in an Array
+
+class Solution:
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        h = []
+        for n in nums:
+            heapq.heappush(h,-n)
+        for _ in range(k):
+            res = heapq.heappop(h)
+        return -res
 
 ______________________________________________________________________________
 
-______________________________________________________________________________
+1087. Brace Expansion
+class Solution:
+    def expand(self, s: str) -> List[str]:
+        self.res = []
+        if not s:
+            return self.res
+        cp = []
+        index = 0
+        s = s.replace(',','')
+        while index < len(s):
+            if s[index] == '{':
+                temp = []
+                index += 1
+                while s[index] != '}':
+                    temp.append(s[index])
+                    index += 1
+                cp.append(temp)
+            if index < len(s) and s[index].isalpha():
+                cp.append(s[index])
+            index += 1
+        self.dfs(cp,0,'')
+        self.res.sort()
+        return self.res
+
+    def dfs(self,cp,index,path):
+        if len(cp) == len(path):
+            self.res.append(path)
+            return
+        for i in range(len(cp[index])):
+            self.dfs(cp,index+1,path+cp[index][i])
 
 ______________________________________________________________________________
 
+54. Spiral Matrix
+class Solution:
+    def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
+        if not matrix: return []
+        res = []
+        r,c = 0,0
+        rows = len(matrix) - 1
+        cols = len(matrix[0]) - 1
+
+        while r <= rows and c <= cols:
+            for i in range(c,cols+1):
+                res.append(matrix[r][i])
+            r += 1
+
+            for i in range(r,rows+1):
+                res.append(matrix[i][cols])
+            cols -= 1
+
+            if r <= rows:
+                for i in range(cols,c-1,-1):
+                    res.append(matrix[rows][i])
+                rows -= 1
+
+            if c <= cols:
+                for i in range(rows,r-1,-1):
+                    res.append(matrix[i][c])
+                c += 1
+        return res
 ______________________________________________________________________________
 
+684. Redundant Connection   (UnionFind)
+
+class UnionFind:
+    def __init__(self,n):
+        self.parent = [i for i in range(n+1)]
+        self.ranks = [1 for i in range(n+1)]
+
+    def Find(self,u):
+        if u != self.parent[u]:
+            self.parent[u] = self.Find(self.parent[u])
+        return self.parent[u]
+
+    def Union(self,u,v):
+        pu,pv = self.Find(u),self.Find(v)
+        if pu != pv:
+            if self.ranks[pu] > self.ranks[pv]:
+                self.parent[pv] = pu
+            elif self.ranks[pu] < self.ranks[pv]:
+                self.parent[pu] = pv
+            else:
+                self.parent[pv] = pu
+                self.ranks[pu] += 1
+            return False
+        return True
+
+class Solution:
+    def findRedundantConnection(self, edges: List[List[int]]) -> List[int]:
+        n = len(edges)
+        uf = UnionFind(n)
+        for edge in edges:
+            if uf.Union(edge[0],edge[1]):
+                return edge
+        return []
 ______________________________________________________________________________
+
+547. Friend Circles       (DFS)
+class Solution:
+    def findCircleNum(self, matrix: List[List[int]]) -> int:
+        if not matrix: return 0
+        visited = [0]*len(matrix)
+        cnt = 0
+        for r in range(len(matrix)):
+            if visited[r] == 0:
+                visited[r] = 1
+                self.dfs(matrix,visited,r)
+                cnt += 1
+        return cnt
+
+    def dfs(self,matrix,visited,r):
+        for i in range(len(matrix)):
+            if matrix[r][i] == 1 and visited[i] == 0:
+                visited[i] = 1
+                self.dfs(matrix,visited,i)
+______________________________________________________________________________
+
+
 
 ______________________________________________________________________________
 
