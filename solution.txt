@@ -3362,7 +3362,7 @@ class TicTacToe:
 # param_1 = obj.move(row,col,player)
 ______________________________________________________________________________
 
-127. Word Ladder
+127. Word Ladder                    O(M*N)  M: length of words, N: number of word
     def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
         if endWord not in wordList:
             return 0
@@ -4039,9 +4039,7 @@ ______________________________________________________________________________
 279. Perfect Squares        (dp) O(N*sqrt(N))
 
     def numSquares(self, n: int) -> int:
-        dp = [n]*(n+1)
-        dp[0] = 0
-        dp[1] = 1
+        dp = [i for i in range(n+1)]
         for i in range(2,n+1):
             j = 1
             while j*j <= i:
@@ -4664,34 +4662,321 @@ class Solution:
                 self.dfs(matrix,visited,i)
 ______________________________________________________________________________
 
+437. Path Sum III
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
 
+class Solution:
+    def pathSum(self, root: TreeNode, sum: int) -> int:
+        if not root: return 0
+        preSum = dict()
+        self.res = 0
+        self.dfs(root,preSum,0,sum)
+        return self.res
+
+    def dfs(self,root,preSum,pathSum,sum):
+        if not root: return 0
+        pathSum += root.val
+        if pathSum == sum:
+            self.res += 1
+        if pathSum - sum in preSum:
+            self.res += preSum[pathSum-sum]
+        if pathSum in preSum:
+            preSum[pathSum] += 1
+        else:
+            preSum[pathSum] = 1
+        if root.left:
+            self.dfs(root.left,preSum,pathSum,sum)
+        if root.right:
+            self.dfs(root.right,preSum,pathSum,sum)
+        preSum[pathSum] -= 1
+        if preSum[pathSum] == 0:
+            del preSum[pathSum]
 
 ______________________________________________________________________________
 
+399. Evaluate Division
+
+class Solution:
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+        table = collections.defaultdict(dict)
+        for (x,y), v in zip(equations,values):
+            table[x][y] = v
+            table[y][x] = 1.0/v
+        ans = []
+        for x,y in queries:
+            if x in table and y in table:
+                ans.append(self.dfs(table,x,y,set()))
+            else:
+                ans.append(-1.0)
+        return ans
+
+    def dfs(self,table,x,y,visited):
+        if x == y: return 1.0
+        for v in table[x]:
+            if v in visited: continue
+            visited.add(v)
+            d = self.dfs(table,v,y,visited)
+            if d != -1.0:
+                return d*table[x][v]
+        return -1.0
 ______________________________________________________________________________
+
+251. Flatten 2D Vector
+class Vector2D:
+
+    def __init__(self, v: List[List[int]]):
+        self.q = collections.deque()
+        for r in range(len(v)):
+            for c in range(len(v[r])):
+                self.q.append(v[r][c])
+
+    def next(self) -> int:
+        return self.q.popleft()
+
+    def hasNext(self) -> bool:
+______________________________________________________________________________
+
+144. Binary Tree Preorder Traversal
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def preorderTraversal(self, root: TreeNode) -> List[int]:
+        if not root: return []
+        res = []
+        stack = [root]
+        while stack:
+            n = len(stack)
+            for i in range(n):
+                node = stack.pop()
+                res.append(node.val)
+                if node.right:
+                    stack.append(node.right)
+                if node.left:
+                    stack.append(node.left)
+        return res
 
 ______________________________________________________________________________
 
-______________________________________________________________________________
+94. Binary Tree Inorder Traversal
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def inorderTraversal(self, root: TreeNode) -> List[int]:
+        if not root:
+            return []
+        stack = []
+        res = []
+        while root or stack:
+            if root:
+                stack.append(root)
+                root = root.left
+            else:
+                node = stack.pop()
+                res.append(node.val)
+                if node.right:
+                    root = node.right
+        return res
 
 ______________________________________________________________________________
 
+737. Sentence Similarity II
+class Solution:
+    def areSentencesSimilarTwo(self, words1: List[str], words2: List[str], pairs: List[List[str]]) -> bool:
+        if len(words1) != len(words2):
+            return False
+        table = collections.defaultdict(set)
+        for x,y in pairs:
+            table[x].add(y)
+            table[y].add(x)
+        for w1, w2 in zip(words1,words2):
+            if not self.dfs(table,w1,w2,set()):
+                return False
+        return True
+
+    def dfs(self,table,w1,w2,visited):
+        if w1 == w2: return True
+        for w in table[w1]:
+            if w in visited: continue
+            visited.add(w)
+            if self.dfs(table,w,w2,visited):
+                return True
+        return False
+______________________________________________________________________________
+
+289. Game of Life
+class Solution:
+    def gameOfLife(self, board: List[List[int]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+        if not board:
+            return
+        q = collections.deque()
+        rows = len(board)
+        cols = len(board[0])
+        array = []
+        dirs = [(1,0),(-1,0),(0,1),(0,-1),(-1,-1),(-1,1),(1,1),(1,-1)]
+        for r in range(rows):
+            for c in range(cols):
+                lives,dies = 0,0
+                for dr, dc in dirs:
+                    if 0<=dr+r<rows and 0<=dc+c<cols:
+                        if board[dr+r][dc+c] == 1:
+                            lives += 1
+                        else:
+                            dies += 1
+                if board[r][c] == 1:
+                    if lives < 2 or lives > 3:
+                        array.append([0,r,c])
+                else:
+                    if lives == 3:
+                        array.append([1,r,c])
+        for status,r,c in array:
+            board[r][c] = status
+
+______________________________________________________________________________
+19. Remove Nth Node From End of List
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def removeNthFromEnd(self, head: ListNode, n: int) -> ListNode:
+        if not head: return head
+        dummy = ListNode(-1)
+        dummy.next = head
+        fast = dummy
+        slow = dummy
+        for i in range(n):
+            fast = fast.next
+        while fast.next:
+            slow = slow.next
+            fast = fast.next
+        slow.next = slow.next.next
+        return dummy.next
+______________________________________________________________________________
+322. Coin Change
+class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        dp = [float('inf')]*(amount+1)
+        dp[0] = 0
+        for i in range(amount+1):
+            for coin in coins:
+                if i >= coin:
+                    dp[i] = min(dp[i],dp[i-coin] + 1)
+        return dp[-1] if dp[-1] != float('inf') else -1
+______________________________________________________________________________
+518. Coin Change 2
+class Solution:
+    def change(self, amount: int, coins: List[int]) -> int:
+        dp = [1]+[0]*amount
+        for coin in coins:
+            for i in range(1,amount+1):
+                if i >= coin:
+                    dp[i] += dp[i-coin]
+        return dp[-1]
+
+______________________________________________________________________________
+1291. Sequential Digits
+
+class Solution:
+    def sequentialDigits(self, low: int, high: int) -> List[int]:
+        l = low
+        n = 1
+        start = 0
+        addition = 0
+        res = []
+        while l > 0:
+            start = start*10 + n
+            l //= 10
+            addition = addition*10 + 1
+            n += 1
+        ts = start
+        while ts < low:
+            if ts%10 == 9:
+                addition = addition*10 + 1
+                start = start*10 + n
+                n += 1
+                ts = start
+            else:
+                ts += addition
+        while low <= ts <= high:
+            res.append(ts)
+            if ts%10 == 9:
+                addition = addition*10 + 1
+                start = start*10 + n
+                n += 1
+                ts = start
+            else:
+                ts += addition
+        return res
+______________________________________________________________________________
+129. Sum Root to Leaf Numbers
+
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def sumNumbers(self, root: TreeNode) -> int:
+        if not root: return 0
+        self.res = []
+        self.dfs(root,0)
+        return sum(self.res)
+
+    def dfs(self,root,path):
+        if not root: return
+        if root.left == root.right:
+            self.res.append(path*10+root.val)
+            return
+        self.dfs(root.left,path*10+root.val)
+        self.dfs(root.right,path*10+root.val)
+______________________________________________________________________________
+92. Reverse Linked List II
+
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def reverseBetween(self, head: ListNode, m: int, n: int) -> ListNode:
+        if not head: return head
+        dummy = ListNode(-1)
+        dummy.next = head
+        prev = dummy
+        for i in range(m-1):
+            prev = prev.next
+        cur = prev.next
+        for i in range(n-m):
+            temp = cur.next
+            cur.next = temp.next
+            temp.next = prev.next
+            prev.next = temp
+        return dummy.next
 ______________________________________________________________________________
 stop
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
-______________________________________________________________________________
-
 ______________________________________________________________________________
 
 ______________________________________________________________________________
