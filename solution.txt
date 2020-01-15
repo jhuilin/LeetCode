@@ -5004,20 +5004,149 @@ class Solution:
         return res
 
 ______________________________________________________________________________
+81. Search in Rotated Sorted Array II
+class Solution:
+    def search(self, nums: List[int], target: int) -> bool:
+        if not nums: return 0
+        left,right = 0, len(nums)-1
+        while left <= right:
+            while left < right and nums[left] == nums[right]:
+                left += 1
+            mid = left+(right-left)//2
+            if nums[mid] == target:
+                return True
+            if nums[left] <= nums[mid]:
+                if nums[left] <= target < nums[mid]:
+                    right = mid - 1
+                else:
+                    left = mid + 1
+            elif nums[mid] <= nums[right]:
+                if nums[mid] < target <= nums[right]:
+                    left = mid + 1
+                else:
+                    right = mid - 1
+        return False
+______________________________________________________________________________
+
+39. Combination Sum
+
+class Solution:
+    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+        if not candidates: return []
+        self.res = []
+        self.dfs(candidates,0,target,[])
+        return self.res
+
+    def dfs(self,nums,index,target,path):
+        if target < 0: return
+        if target == 0:
+            self.res.append(path)
+            return
+        for i in range(index,len(nums)):
+            self.dfs(nums,i,target-nums[i],path+[nums[i]])
+______________________________________________________________________________
+
+77. Combinations
+class Solution:
+    def combine(self, n: int, k: int) -> List[List[int]]:
+        if k == 0: return []
+        self.res = []
+        self.dfs(n,k,1,[])
+        return self.res
+
+    def dfs(self,n,k,index,path):
+        if len(path) == k:
+            self.res.append(path)
+            return
+        for i in range(index,n+1):
+            self.dfs(n,k,i+1,path+[i])
 
 ______________________________________________________________________________
 
+40. Combination Sum II
+class Solution:
+    def combinationSum2(self, candidates: List[int], target: int) -> List[List[int]]:
+        if not candidates: return []
+        candidates.sort()
+        self.res = []
+        self.backtrack(candidates,0,target,[])
+        return self.res
+
+    def backtrack(self,nums,index,target,path):
+        if target < 0: return
+        if target == 0:
+            self.res.append(path)
+            return
+        for i in range(index,len(nums)):
+            if i > index and nums[i] == nums[i-1]:
+                continue
+            self.backtrack(nums,i+1,target-nums[i],path+[nums[i]])
 ______________________________________________________________________________
+
+216. Combination Sum III
+class Solution:
+    def combinationSum3(self, k: int, n: int) -> List[List[int]]:
+        if k == 0: return []
+        self.res = []
+        self.dfs(k,n,1,[])
+        return self.res
+
+    def dfs(self,k,n,index,path):
+        if k < 0 or n < 0: return
+        if k == 0 and n == 0:
+            self.res.append(path)
+            return
+        for i in range(index,10):
+            self.dfs(k-1,n-i,i+1,path+[i])
 
 ______________________________________________________________________________
 
+377. Combination Sum IV
+class Solution:
+    def combinationSum4(self, nums: List[int], target: int) -> int:
+        dp = [1]+[0]*target
+        for i in range(1,target+1):
+            for num in nums:
+                if i >= num:
+                    dp[i] += dp[i-num]
+        return dp.pop()
 ______________________________________________________________________________
 
+69. Sqrt(x)
+class Solution:
+    def mySqrt(self, x: int) -> int:
+        if x < 2: return x
+        left,right = 0, x//2
+        while left <= right:
+            mid = left +(right-left)//2
+            if mid**2 > x:
+                right = mid - 1
+            else:
+                left = mid + 1
+        return left - 1
 ______________________________________________________________________________
 
-______________________________________________________________________________
-stop
-______________________________________________________________________________
+76. Minimum Window Substring
+class Solution:
+    def minWindow(self, s: str, t: str) -> str:
+        count = collections.Counter(t)
+        res = ''
+        left,cnt,minLen = 0,0,float('inf')
+        for right, c in enumerate(s):
+            if c in count:
+                if count[c] > 0:
+                    cnt += 1
+                count[c] -= 1
+                while cnt == len(t):
+                    if minLen > right - left + 1:
+                        minLen = right - left + 1
+                        res = s[left:right+1]
+                    if s[left] in count:
+                        count[s[left]] += 1
+                        if count[s[left]] > 0:
+                            cnt -= 1
+                    left += 1
+        return res
 
 ______________________________________________________________________________
 
