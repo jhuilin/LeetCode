@@ -5149,13 +5149,147 @@ class Solution:
         return res
 
 ______________________________________________________________________________
+212. Word Search II
+class Node:
+    def __init__(self,val):
+        self.val = val
+        self.children = dict()
+        self.word = ''
+        self.isEnd = False
 
+class Trie:
+    def __init__(self):
+        self.root = Node(None)
+
+    def add(self,word):
+        node = self.root
+        for letter in word:
+            if letter not in node.children:
+                node.children[letter] = Node(letter)
+            node = node.children[letter]
+        node.isEnd = True
+        node.word = word
+
+class Solution:
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+        if not board: return []
+        self.res = []
+        trie = Trie()
+        rows = len(board)
+        cols = len(board[0])
+        for word in words:
+            trie.add(word)
+        for r in range(rows):
+            for c in range(cols):
+                if board[r][c] in trie.root.children:
+                    self.dfs(board,r,c,trie.root)
+        return self.res
+
+    def dfs(self,board,r,c,root):
+        dirs = [(0,1),(0,-1),(1,0),(-1,0)]
+        temp = board[r][c]
+        board[r][c] = '*'
+        node = root.children[temp]
+        for dr,dc in dirs:
+            if 0<=dr+r<len(board) and 0<=dc+c<len(board[0]) and board[dr+r][dc+c] in node.children:
+                self.dfs(board,dr+r,dc+c,node)
+        board[r][c] = temp
+        if node.isEnd:
+            self.res.append(node.word)
+            node.isEnd = False
 ______________________________________________________________________________
 
+239. Sliding Window Maximum
+class Solution:
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+        if not nums: return []
+        q = collections.deque()
+        left = 0
+        res = []
+        for i in range(len(nums)):
+            while q and nums[i] > nums[q[-1]]:
+                q.pop()
+            q.append(i)
+            if i-left == k-1:
+                res.append(nums[q[0]])
+                if left == q[0]:
+                    q.popleft()
+                left += 1
+        return res
+
+>>>>Java<<<<
+class Solution {
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        if (nums.length == 0 || k == 0)
+            return new int[0];
+        ArrayDeque<Integer> q = new ArrayDeque<>();
+        int[] res = new int[nums.length-k+1];
+        int left = 0;
+        for (int i=0; i<nums.length; ++i){
+            while (!q.isEmpty() && nums[i] > nums[q.getLast()])
+                q.removeLast();
+            q.addLast(i);
+            if (i-left == k-1){
+                res[i-k+1] = nums[q.getFirst()];
+                if (q.getFirst() == left)
+                    q.removeFirst();
+                left += 1;
+            }
+        }
+        return res;
+    }
+}
 ______________________________________________________________________________
 
-______________________________________________________________________________
+674. Longest Continuous Increasing Subsequence
+class Solution:
+    def findLengthOfLCIS(self, nums: List[int]) -> int:
+        if not nums: return 0
+        left,maxLen = 0,1
+        for i in range(1,len(nums)):
+            if nums[i] <= nums[i-1]:
+                left = i
+            maxLen = max(maxLen,i-left+1)
+        return maxLen
 
+>>>>Java<<<<
+class Solution {
+    public int findLengthOfLCIS(int[] nums) {
+        if (nums == null || nums.length == 0)
+            return 0;
+        int left = 0, maxLen = 1;
+        for (int i=1; i<nums.length; ++i){
+            if (nums[i] <= nums[i-1])
+                left = i;
+            maxLen = Math.max(maxLen,i-left+1);
+        }
+        return maxLen;
+    }
+}
+______________________________________________________________________________
+727. Minimum Window Subsequence
+class Solution:
+    def minWindow(self, S: str, T: str) -> str:
+        i,j,end = 0,0,0
+        res = ''
+        minLen = len(S)+1
+        while i < len(S):
+            if S[i] == T[j]:
+                j += 1
+                if j == len(T):
+                    end = i
+                    j -= 1
+                    while j>=0:
+                        if S[i] == T[j]:
+                            j -= 1
+                        i -= 1
+                    j = 0
+                    i += 1
+                    if end-i+1 < minLen:
+                        minLen = end-i+1
+                        res = S[i:end+1]
+            i += 1
+        return res
 ______________________________________________________________________________
 
 ______________________________________________________________________________
