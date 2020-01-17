@@ -5292,7 +5292,121 @@ class Solution:
         return res
 ______________________________________________________________________________
 
+1312. Minimum Insertion Steps to Make a String Palindrome
+class Solution:
+    def minInsertions(self, s: str) -> int:
+        n = len(s)
+        memo = [[float('inf')]*n for i in range(n)]
+        return self.helper(s,0,n-1,memo)
+
+    def helper(self,s,left,right,memo):
+        if left >= right:
+            return 0
+        if memo[left][right] != float('inf'):
+            return memo[left][right]
+        if s[left] == s[right]:
+            memo[left][right] = self.helper(s,left+1,right-1,memo)
+        else:
+            memo[left][right] = min(self.helper(s,left+1,right,memo),self.helper(s,left,right-1,memo))+1
+        return memo[left][right]
+
+
+
+class Solution {
+    public int minInsertions(String s) {
+        int n = s.length();
+        int [][] memo = new int [n][n];
+        for (int i=0; i<n; ++i){
+            Arrays.fill(memo[i], Integer.MAX_VALUE);
+        }
+        return helper(s.toCharArray(),0,s.length()-1,memo);
+    }
+
+    private int helper(char[] sArr, int left, int right, int[][] memo){
+        if (left >= right)
+            return 0;
+        if (memo[left][right] != Integer.MAX_VALUE)
+            return memo[left][right];
+        if (sArr[left] == sArr[right])
+            memo[left][right] = helper(sArr, left+1, right-1, memo);
+        else
+            memo[left][right] = Math.min(helper(sArr,left+1,right,memo),helper(sArr,left,right-1,memo))+1;
+        return memo[left][right];
+    }
+}
 ______________________________________________________________________________
+
+1214. Two Sum BSTs
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def twoSumBSTs(self, root1: TreeNode, root2: TreeNode, target: int) -> bool:
+        if not root1 or not root2: return False
+        q = collections.deque()
+        table = collections.defaultdict(int)
+        q.append(root1)
+        while q:
+            node = q.popleft()
+            table[target-node.val] = node.val
+            if node.left:
+                q.append(node.left)
+            if node.right:
+                q.append(node.right)
+        q.append(root2)
+        while q:
+            node = q.popleft()
+            if node.val in table:
+                return True
+            if node.left:
+                q.append(node.left)
+            if node.right:
+                q.append(node.right)
+        return False
+
+
+
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    public boolean twoSumBSTs(TreeNode root1, TreeNode root2, int target) {
+        if (root1 == null || root2 == null)
+            return false;
+        Map<Integer, Integer> map = new HashMap<>();
+        ArrayDeque<TreeNode> deque = new ArrayDeque<>();
+        deque.add(root1);
+        while (!deque.isEmpty()){
+            TreeNode node = deque.removeFirst();
+            map.put(target-node.val,node.val);
+            if (node.left != null)
+                deque.addLast(node.left);
+            if (node.right != null)
+                deque.addLast(node.right);
+        }
+        deque.add(root2);
+        while (!deque.isEmpty()){
+            TreeNode node = deque.removeFirst();
+            if (map.containsKey(node.val))
+                return true;
+            if (node.left != null)
+                deque.addLast(node.left);
+            if (node.right != null)
+                deque.addLast(node.right);
+        }
+        return false;
+    }
+}
 
 ______________________________________________________________________________
 
