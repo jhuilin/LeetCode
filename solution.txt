@@ -5410,7 +5410,71 @@ class Solution {
 
 ______________________________________________________________________________
 
+84. Largest Rectangle in Histogram
+
+class Solution:
+    def largestRectangleArea(self, heights: List[int]) -> int:
+        stack = [-1]
+        res = 0
+        n = len(heights)
+        for i in range(n):
+            while stack[-1] != -1 and heights[i] < heights[stack[-1]]:
+                h = heights[stack.pop()]
+                w = i - stack[-1] - 1
+                res = max(res,w*h)
+            stack.append(i)
+        while stack[-1] != -1:
+            h = heights[stack.pop()]
+            w = n - stack[-1] - 1
+            res = max(res,w*h)
+        return res
 ______________________________________________________________________________
+
+101. Symmetric Tree
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def isSymmetric(self, root: TreeNode) -> bool:
+        if not root: return True
+        return self.mirror(root.left,root.right)
+
+    def mirror(self,l,r):
+        if not l or not r:
+            return l == r
+        if l.val != r.val:
+            return False
+        return self.mirror(l.left,r.right) and self.mirror(l.right,r.left)
+______________________________________________________________________________
+
+133. Clone Graph
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val = 0, neighbors = []):
+        self.val = val
+        self.neighbors = neighbors
+"""
+class Solution:
+    def cloneGraph(self, node: 'Node') -> 'Node':
+        if not node: return node
+        visited = dict()
+        q = collections.deque()
+        q.append(node)
+        visited[node] = Node(node.val,[])
+        while q:
+            curNode = q.popleft()
+            for neighbor in curNode.neighbors:
+                if neighbor not in visited:
+                    q.append(neighbor)
+                    visited[neighbor] = Node(neighbor.val,[])
+                visited[curNode].neighbors.append(visited[neighbor])
+        return visited[node]
+
 
 ______________________________________________________________________________
 
@@ -5419,9 +5483,7 @@ ______________________________________________________________________________
 ______________________________________________________________________________
 
 ______________________________________________________________________________
-
-______________________________________________________________________________
-
+stop
 ______________________________________________________________________________
 
 ______________________________________________________________________________
