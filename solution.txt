@@ -6147,11 +6147,132 @@ class Solution:
         return max(l,r)+1
 ______________________________________________________________________________
 
+974. Subarray Sums Divisible by K
+class Solution:
+    def subarraysDivByK(self, nums: List[int], k: int) -> int:
+        if not nums: return 0
+        preSum = collections.defaultdict(int)
+        preSum [0] = 1
+        add,res=0,0
+        for n in nums:
+            add += n
+            if k != 0:
+                add %= k
+            if add in preSum:
+                res += preSum[add]
+            preSum[add] += 1
+        return res
 ______________________________________________________________________________
+
+617. Merge Two Binary Trees
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def mergeTrees(self, t1: TreeNode, t2: TreeNode) -> TreeNode:
+        if not t1 and not t2: return None
+        if not t1: return t2
+        if not t2: return t1
+        root = TreeNode(t1.val+t2.val)
+        root.left = self.mergeTrees(t1.left,t2.left)
+        root.right = self.mergeTrees(t1.right,t2.right)
+        return root
 
 ______________________________________________________________________________
 
+694. Number of Distinct Islands
+class Solution:
+    def numDistinctIslands(self, grid: List[List[int]]) -> int:
+        if not grid: return 0
+        visited = set()
+        rows = len(grid)
+        cols = len(grid[0])
+        for r in range(rows):
+            for c in range(cols):
+                if grid[r][c] == 1:
+                    island = []
+                    self.dfs(grid,r,c,island)
+                    i = self.convertIsland(island)
+                    visited.add(i)
+        return len(visited)
+
+    def dfs(self,grid,r,c,island):
+        dirs=[(0,1),(0,-1),(1,0),(-1,0)]
+        grid[r][c] = 0
+        island.append([r,c])
+        for dr,dc in dirs:
+            if 0<=dr+r<len(grid) and 0<=dc+c<len(grid[0]) and grid[dr+r][dc+c]==1:
+                self.dfs(grid,dr+r,dc+c,island)
+
+    def convertIsland(self,island):
+        x,y = island[0]
+        res = ""
+        for point in island:
+            res = res + str(point[0]-x) + str(point[1]-y)
+        return res
 ______________________________________________________________________________
+
+716. Max Stack
+
+class MaxStack:
+
+    def __init__(self):
+        """
+        initialize your data structure here.
+        """
+        self.stack = []
+        self.max = []
+
+
+    def push(self, x: int) -> None:
+        self.stack.append(x)
+        self.pushOnMax(x)
+
+    def pop(self) -> int:
+        self.max.pop()
+        return self.stack.pop()
+
+    def top(self) -> int:
+        return self.stack[-1]
+
+    def peekMax(self) -> int:
+        return self.max[-1]
+
+    def popMax(self) -> int:
+        val = self.max[-1]
+        temp = []
+        while self.stack:
+            self.max.pop()
+            v = self.stack.pop()
+            if v != val:
+                temp.append(v)
+            else:
+                break
+        while temp:
+            v = temp.pop()
+            self.stack.append(v)
+            self.pushOnMax(v)
+        return val
+
+    def pushOnMax(self,v):
+        if not self.max or v > self.max[-1]:
+            self.max.append(v)
+        else:
+            self.max.append(self.max[-1])
+
+
+
+# Your MaxStack object will be instantiated and called as such:
+# obj = MaxStack()
+# obj.push(x)
+# param_2 = obj.pop()
+# param_3 = obj.top()
+# param_4 = obj.peekMax()
+# param_5 = obj.popMax()
 
 ______________________________________________________________________________
 
